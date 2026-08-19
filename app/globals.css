@@ -1,0 +1,71 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f7f9f4;
+  --surface: #ffffff;
+  --surface-glass: rgba(255, 255, 255, 0.55);
+  --ink: #1f2b22;
+  --ink-muted: #63705f;
+  --gold: #3f6b4a;
+  --gold-soft: #cfe0cd;
+  --champagne: #ecdcae;
+  --sage: #b8895a;
+  --ivory: #fffdf8;
+  --border-soft: rgba(31, 43, 34, 0.1);
+}
+
+:root.dark {
+  --background: #10160f;
+  --surface: #182018;
+  --surface-glass: rgba(24, 32, 24, 0.55);
+  --ink: #eef3ea;
+  --ink-muted: #b9c4b3;
+  --gold: #6fae7f;
+  --gold-soft: #2c3f2c;
+  --champagne: #4a3c26;
+  --sage: #cf9f6e;
+  --ivory: #182018;
+  --border-soft: rgba(238, 243, 234, 0.12);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--ink);
+  --font-sans: var(--font-jost);
+  --font-serif: var(--font-playfair);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--ink);
+  transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+::selection {
+  background: var(--gold-soft);
+  color: var(--ink);
+}
+
+.glass-panel {
+  background: var(--surface-glass);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  border: 1px solid var(--border-soft);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
