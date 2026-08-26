@@ -30,7 +30,7 @@ export function FloatingButtons() {
         animate={{ opacity: 1, scale: 1 }}
         whileHover={{ scale: 1.08 }}
         transition={{ delay: 1.4, duration: 0.4 }}
-        className="flex h-13 w-13 items-center justify-center rounded-full bg-[color:var(--gold)] p-3.5 text-white shadow-[0_10px_30px_-10px_rgba(63,107,74,0.7)]"
+        className="flex h-13 w-13 items-center justify-center rounded-full bg-[color:var(--gold)] p-3.5 text-white shadow-[0_10px_30px_-10px_rgba(28,40,65,0.7)]"
       >
         <PartyPopper size={22} />
       </MotionLink>

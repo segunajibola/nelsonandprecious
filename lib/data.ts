@@ -63,7 +63,7 @@ export const loveStory: LoveStoryEvent[] = [
     image: "/images/wedding-invitation.jpeg",
   },
 ];
-
+1;
 export const aboutEachOther: AboutEachOtherEntry[] = [
   {
     from: "Nelson",
@@ -177,18 +177,27 @@ export const videoMoments: VideoItem[] = [
   },
 ];
 
+export const ceremonyVenue: VenueDetail = {
+  heading: "Wedding Ceremony",
+  name: "Kingdom Hall",
+  date: "September 26, 2026",
+  time: "10:30 AM – 11:30 AM",
+  address: "Address to be shared soon — check back closer to the date.",
+};
+
 export const event: VenueDetail = {
-  heading: "Wedding Ceremony & Reception",
+  heading: "Wedding Reception",
   name: "Purple Garden Event Center",
   date: "September 26, 2026",
   time: "12:00 PM",
-  address: "Beside MFM Southwest 1 Headquarters, Obantoko, Abeokuta, Ogun State, Nigeria",
+  address:
+    "Beside MFM Southwest 1 Headquarters, Obantoko, Abeokuta, Ogun State, Nigeria",
   dressCode: "White & Peach",
   parking: "Complimentary valet and on-site parking available for guests",
   mapsUrl:
     "https://www.google.com/maps/search/?api=1&query=" +
     encodeURIComponent(
-      "Purple Garden Event Center, beside MFM Southwest 1 Headquarters, Obantoko, Abeokuta, Ogun State, Nigeria"
+      "Purple Garden Event Center, beside MFM Southwest 1 Headquarters, Obantoko, Abeokuta, Ogun State, Nigeria",
     ),
 };
 
@@ -196,12 +205,14 @@ export const accommodation: AccommodationInfo = {
   hotels: [
     {
       name: "Moongate Hotel and Suites, Obantoko",
-      distance: "Km 8, Abeokuta/Ibadan Expressway (Opposite Winners Chapel), Obantoko — close to the venue",
+      distance:
+        "Km 8, Abeokuta/Ibadan Expressway (Opposite Winners Chapel), Obantoko — close to the venue",
       priceRange: "$$",
     },
     {
       name: "BG Hotel",
-      distance: "1 Abeokuta/Ibadan Expressway, Camp Junction, Obantoko — close to the venue",
+      distance:
+        "1 Abeokuta/Ibadan Expressway, Camp Junction, Obantoko — close to the venue",
       priceRange: "$$",
     },
   ],
@@ -255,7 +266,8 @@ export const groomParty: WeddingPartyMember[] = [
     id: "groom",
     name: "Nelson Ifeanyi Okafor",
     role: "Groom",
-    message: "Every day with her feels like the beginning of something beautiful.",
+    message:
+      "Every day with her feels like the beginning of something beautiful.",
   },
   { id: "gm1", name: "Emmanuel Okafor", role: "Groomsman" },
   { id: "gm2", name: "David Chukwuemeka", role: "Groomsman" },
@@ -265,23 +277,65 @@ export const groomParty: WeddingPartyMember[] = [
 
 export const schedule: ScheduleItem[] = [
   {
-    time: "11:30 AM",
-    title: "Guests Arrive",
-    description: "Please be seated by 11:45 AM",
+    time: "10:30 AM",
+    title: "Wedding Ceremony",
+    description:
+      "At the Kingdom Hall — address to be shared closer to the date",
   },
-  { time: "12:00 PM", title: "Ceremony Begins" },
   {
-    time: "1:15 PM",
-    title: "Photography",
-    description: "Family and wedding party portraits",
+    time: "12:00 PM",
+    title: "Reception Begins",
+    description: "Purple Garden Event Center",
   },
-  { time: "1:45 PM", title: "Lunch & Cocktail Hour" },
+];
+
+export const receptionProgramme: PhotoOrderItem[] = [
+  { order: 1, title: "Guest Arrival" },
+  { order: 2, title: "Brief Welcome by the MC" },
+  { order: 3, title: "Groom's Family Grand Entrance" },
+  { order: 4, title: "Bride's Family Grand Entrance" },
+  { order: 5, title: "Bridesmaids and Groomsmen Grand Entrance" },
+  { order: 6, title: "Bride and Groom Official Entrance" },
+  { order: 7, title: "Energizer Session by the MC" },
+  { order: 8, title: "Opening Prayer" },
+  { order: 9, title: "Chairman's Opening Remark" },
+  { order: 10, title: "Cake Cutting" },
   {
-    time: "3:00 PM",
-    title: "Dance",
-    description: "First dance followed by open floor",
+    order: 11,
+    title: "Couple's First Dance",
+    description: "In classic outfit",
   },
-  { time: "4:30 PM", title: "Farewell, but party continues" },
+  { order: 12, title: "Audience Game" },
+  {
+    order: 13,
+    title: "Couple's Second Entrance",
+    description: "Groom with Groomsmen / Agbada Dance",
+  },
+  {
+    order: 14,
+    title: "Couple's Second Entrance",
+    description: "Bride with Bridesmaids / Asoebi Dance",
+  },
+  {
+    order: 15,
+    title: "Fun Time",
+    description: "Men in Agbada vs Asoebi Ladies",
+  },
+  { order: 16, title: "Presentation of Gifts" },
+  {
+    order: 17,
+    title: "Bride & Bride's Father Dance",
+    description: "Mother joins later",
+  },
+  {
+    order: 18,
+    title: "Groom & Groom's Mother Dance",
+    description: "Father joins later",
+  },
+  { order: 19, title: "Chairman's Closing Speech" },
+  { order: 20, title: "Groom's Vote of Thanks" },
+  { order: 21, title: "Closing Prayer" },
+  { order: 22, title: "Let's Dance!" },
 ];
 
 export const photoOrder: PhotoOrderItem[] = [
@@ -317,7 +371,7 @@ export const faqs: FaqItem[] = [
   {
     question: "What time should I arrive?",
     answer:
-      "Please arrive by 11:30 AM to be seated before the ceremony begins at 12:00 PM. Given expressway traffic, we recommend leaving with plenty of buffer time.",
+      "The wedding ceremony holds at the Kingdom Hall from 10:30 AM to 11:30 AM, and the reception begins at 12:00 PM at Purple Garden Event Center. Given expressway traffic, we recommend leaving with plenty of buffer time.",
   },
 ];
 

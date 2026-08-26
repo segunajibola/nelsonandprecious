@@ -1,7 +1,8 @@
 "use client";
 
 import { Church, MapPin, PartyPopper, Shirt } from "lucide-react";
-import { event } from "@/lib/data";
+import { ceremonyVenue, event } from "@/lib/data";
+import type { VenueDetail } from "@/types";
 import { Section } from "@/components/ui/Section";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Reveal } from "@/components/ui/Reveal";
@@ -20,6 +21,27 @@ function DetailRow({ icon: Icon, label, value }: { icon: React.ElementType; labe
   );
 }
 
+function VenueCard({ venue }: { venue: VenueDetail }) {
+  return (
+    <Card className="flex h-full w-full flex-col gap-5">
+      <Church size={28} className="text-[color:var(--gold)]" />
+      <h3 className="font-serif text-2xl text-[color:var(--ink)]">{venue.heading}</h3>
+      <div className="flex flex-col gap-4">
+        <DetailRow icon={MapPin} label="Venue" value={venue.name} />
+        <DetailRow icon={PartyPopper} label="Date &amp; Time" value={`${venue.date} at ${venue.time}`} />
+        <DetailRow icon={MapPin} label="Address" value={venue.address} />
+        {venue.dressCode && <DetailRow icon={Shirt} label="Dress Code" value={venue.dressCode} />}
+        {venue.parking && <DetailRow icon={MapPin} label="Parking" value={venue.parking} />}
+      </div>
+      {venue.mapsUrl && (
+        <Button href={venue.mapsUrl} target="_blank" rel="noopener noreferrer" variant="secondary" className="mt-auto w-full">
+          Open in Google Maps
+        </Button>
+      )}
+    </Card>
+  );
+}
+
 export function WeddingDetails() {
   return (
     <Section id="details" className="bg-[color:var(--surface)]/40">
@@ -30,22 +52,12 @@ export function WeddingDetails() {
         className="mb-16"
       />
 
-      <div className="grid gap-8">
+      <div className="mx-auto grid max-w-4xl gap-8 sm:grid-cols-2">
         <Reveal>
-          <Card className="mx-auto flex h-full w-full max-w-xl flex-col gap-5">
-            <Church size={28} className="text-[color:var(--gold)]" />
-            <h3 className="font-serif text-2xl text-[color:var(--ink)]">{event.heading}</h3>
-            <div className="flex flex-col gap-4">
-              <DetailRow icon={MapPin} label="Venue" value={event.name} />
-              <DetailRow icon={PartyPopper} label="Date &amp; Time" value={`${event.date} at ${event.time}`} />
-              <DetailRow icon={MapPin} label="Address" value={event.address} />
-              <DetailRow icon={Shirt} label="Dress Code" value={event.dressCode ?? ""} />
-              <DetailRow icon={MapPin} label="Parking" value={event.parking ?? ""} />
-            </div>
-            <Button href={event.mapsUrl} target="_blank" rel="noopener noreferrer" variant="secondary" className="mt-auto w-full">
-              Open in Google Maps
-            </Button>
-          </Card>
+          <VenueCard venue={ceremonyVenue} />
+        </Reveal>
+        <Reveal delay={0.1}>
+          <VenueCard venue={event} />
         </Reveal>
       </div>
     </Section>

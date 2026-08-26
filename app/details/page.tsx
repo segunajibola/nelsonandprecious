@@ -11,6 +11,7 @@ import { VenueMap } from "@/sections/VenueMap";
 import { ZoomMeeting } from "@/sections/ZoomMeeting";
 import { RSVP } from "@/sections/RSVP";
 import { Schedule } from "@/sections/Schedule";
+import { ReceptionProgramme } from "@/sections/ReceptionProgramme";
 import { PhotoOrder } from "@/sections/PhotoOrder";
 import { ColorPalette } from "@/sections/ColorPalette";
 import { Appreciation } from "@/sections/Appreciation";
@@ -31,6 +32,7 @@ export default function DetailsPage() {
         <ZoomMeeting />
         <RSVP />
         <Schedule />
+        <ReceptionProgramme />
         <PhotoOrder />
         <ColorPalette />
         <Appreciation />

@@ -33,7 +33,7 @@ export interface VenueDetail {
   address: string;
   dressCode?: string;
   parking?: string;
-  mapsUrl: string;
+  mapsUrl?: string;
 }
 
 export interface AccommodationInfo {

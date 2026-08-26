@@ -1,31 +1,31 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f7f9f4;
+  --background: #fdf6f0;
   --surface: #ffffff;
-  --surface-glass: rgba(255, 255, 255, 0.55);
-  --ink: #1f2b22;
-  --ink-muted: #63705f;
-  --gold: #3f6b4a;
-  --gold-soft: #cfe0cd;
-  --champagne: #ecdcae;
-  --sage: #b8895a;
-  --ivory: #fffdf8;
-  --border-soft: rgba(31, 43, 34, 0.1);
+  --surface-glass: rgba(255, 255, 255, 0.6);
+  --ink: #16213e;
+  --ink-muted: #5c6c8a;
+  --gold: #1c2841;
+  --gold-soft: #ffd9b3;
+  --champagne: #ffcba4;
+  --sage: #2a3a5c;
+  --ivory: #fffaf5;
+  --border-soft: rgba(22, 33, 62, 0.12);
 }
 
 :root.dark {
-  --background: #10160f;
-  --surface: #182018;
-  --surface-glass: rgba(24, 32, 24, 0.55);
-  --ink: #eef3ea;
-  --ink-muted: #b9c4b3;
-  --gold: #6fae7f;
-  --gold-soft: #2c3f2c;
-  --champagne: #4a3c26;
-  --sage: #cf9f6e;
-  --ivory: #182018;
-  --border-soft: rgba(238, 243, 234, 0.12);
+  --background: #0e1626;
+  --surface: #16213e;
+  --surface-glass: rgba(22, 33, 62, 0.55);
+  --ink: #f5efe8;
+  --ink-muted: #c3cbdd;
+  --gold: #ffb98a;
+  --gold-soft: #ffd9b3;
+  --champagne: #2a3a5c;
+  --sage: #ffb98a;
+  --ivory: #16213e;
+  --border-soft: rgba(245, 239, 232, 0.12);
 }
 
 @theme inline {

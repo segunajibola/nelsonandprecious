@@ -23,7 +23,7 @@ const initialForm: RsvpFormData = {
 };
 
 function fireConfetti() {
-  const colors = ["#3f6b4a", "#c9a24b", "#e9ddc2", "#fffdf8"];
+  const colors = ["#1c2841", "#ffb98a", "#ffd9b3", "#fffaf5"];
   confetti({
     particleCount: 120,
     spread: 90,
