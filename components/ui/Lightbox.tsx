@@ -88,13 +88,24 @@ export function Lightbox({
             className="relative h-[80vh] w-full max-w-4xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <Image
-              src={current.src}
-              alt={current.alt}
-              fill
-              className="object-contain"
-              sizes="90vw"
-            />
+            {current.type === "video" ? (
+              <video
+                src={current.src}
+                controls
+                autoPlay
+                loop
+                playsInline
+                className="h-full w-full object-contain"
+              />
+            ) : (
+              <Image
+                src={current.src}
+                alt={current.alt}
+                fill
+                className="object-contain"
+                sizes="90vw"
+              />
+            )}
           </motion.div>
 
           <button

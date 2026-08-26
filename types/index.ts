@@ -15,6 +15,7 @@ export interface GalleryImage {
   category: GalleryCategory;
   width: number;
   height: number;
+  type?: "video";
 }
 
 export interface VenueDetail {

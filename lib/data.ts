@@ -132,6 +132,24 @@ export const galleryImages: GalleryImage[] = [
     width: 1500,
     height: 2000,
   },
+  {
+    id: "g8",
+    src: "/images/couple-clip-1.mp4",
+    alt: "A candid video moment with Nelson and Precious",
+    category: "Candid",
+    width: 576,
+    height: 1024,
+    type: "video",
+  },
+  {
+    id: "g9",
+    src: "/images/couple-clip-2.mp4",
+    alt: "Nelson and Precious in motion",
+    category: "Candid",
+    width: 576,
+    height: 1024,
+    type: "video",
+  },
 ];
 
 export const event: VenueDetail = {
