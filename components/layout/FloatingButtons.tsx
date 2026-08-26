@@ -10,7 +10,7 @@ export function FloatingButtons() {
   return (
     <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-3">
       <motion.a
-        href="https://wa.me/234817198212"
+        href="https://wa.me/2348171982126"
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Chat with us on WhatsApp"
