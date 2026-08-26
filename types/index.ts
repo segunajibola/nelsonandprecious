@@ -6,7 +6,7 @@ export interface LoveStoryEvent {
   image: string;
 }
 
-export type GalleryCategory = "Candid" | "Studio" | "Proposal";
+export type GalleryCategory = "Candid" | "Studio" | "Traditional" | "Proposal";
 
 export interface GalleryImage {
   id: string;
@@ -15,7 +15,14 @@ export interface GalleryImage {
   category: GalleryCategory;
   width: number;
   height: number;
-  type?: "video";
+}
+
+export interface VideoItem {
+  id: string;
+  src: string;
+  caption: string;
+  width: number;
+  height: number;
 }
 
 export interface VenueDetail {

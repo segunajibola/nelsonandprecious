@@ -9,6 +9,7 @@ import { useBackgroundMusic } from "@/hooks/useBackgroundMusic";
 import { LoveStory } from "@/sections/LoveStory";
 import { AboutEachOther } from "@/sections/AboutEachOther";
 import { Gallery } from "@/sections/Gallery";
+import { VideoMoments } from "@/sections/VideoMoments";
 import { WeddingParty } from "@/sections/WeddingParty";
 import { GiftRegistry } from "@/sections/GiftRegistry";
 import { ThankYou } from "@/sections/ThankYou";
@@ -32,6 +33,7 @@ export default function GalleryPage() {
         <LoveStory />
         <AboutEachOther />
         <Gallery />
+        <VideoMoments />
         <WeddingParty />
         <GiftRegistry />
         <ThankYou />

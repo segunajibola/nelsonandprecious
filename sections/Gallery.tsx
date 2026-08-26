@@ -3,7 +3,6 @@
 import { useMemo, useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { Play } from "lucide-react";
 import { galleryImages } from "@/lib/data";
 import type { GalleryCategory } from "@/types";
 import { Section } from "@/components/ui/Section";
@@ -16,6 +15,7 @@ const categories: (GalleryCategory | "All")[] = [
   "All",
   "Candid",
   "Studio",
+  "Traditional",
   "Proposal",
 ];
 
@@ -71,30 +71,14 @@ export function Gallery() {
                 transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
                 className="relative h-full w-full"
               >
-                {image.type === "video" ? (
-                  <video
-                    src={image.src}
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <Image
-                    src={image.src}
-                    alt={image.alt}
-                    fill
-                    className="object-cover"
-                    sizes="(min-width: 640px) 33vw, 50vw"
-                  />
-                )}
+                <Image
+                  src={image.src}
+                  alt={image.alt}
+                  fill
+                  className="object-cover"
+                  sizes="(min-width: 640px) 33vw, 50vw"
+                />
               </motion.div>
-              {image.type === "video" && (
-                <div className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm">
-                  <Play size={14} fill="currentColor" />
-                </div>
-              )}
               <div className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/20" />
             </button>
           </Reveal>
