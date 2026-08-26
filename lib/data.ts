@@ -18,7 +18,7 @@ export const couple = {
   groomName: "Nelson",
   brideFullName: "Precious Chiamaka Eze",
   groomFullName: "Nelson Ifeanyi Okafor",
-  hashtag: "#LoveNAP26",
+  hashtag: "#PNLockedIn",
   weddingDateISO: "2026-09-26T12:00:00",
   weddingDateDisplay: "September 26, 2026",
   tagline: "Two Hearts, One Beginning",
@@ -140,7 +140,7 @@ export const event: VenueDetail = {
   date: "September 26, 2026",
   time: "12:00 PM",
   address: "Beside MFM Southwest 1 Headquarters, Obantoko, Abeokuta, Ogun State, Nigeria",
-  dressCode: "Peach & Navy Blue",
+  dressCode: "White & Peach",
   parking: "Complimentary valet and on-site parking available for guests",
   mapsUrl:
     "https://www.google.com/maps/search/?api=1&query=" +
@@ -178,8 +178,8 @@ export const zoomMeeting: ZoomMeetingInfo = {
 };
 
 export const weddingColors: WeddingColor[] = [
+  { name: "White", hex: "#ffffff" },
   { name: "Peach", hex: "#ffcba4" },
-  { name: "Navy Blue", hex: "#1c2841" },
 ];
 
 export const bridalParty: WeddingPartyMember[] = [
@@ -254,7 +254,7 @@ export const faqs: FaqItem[] = [
   {
     question: "What is the dress code?",
     answer:
-      "We'd love to see our wedding colors — peach and navy blue — represented, though it is not required. Come as you feel most comfortable, and please dress for the weather.",
+      "We'd love to see our wedding colors — white and peach — represented, though it is not required. Come as you feel most comfortable, and please dress for the weather.",
   },
   {
     question: "Can I bring a plus one?",
@@ -268,7 +268,8 @@ export const faqs: FaqItem[] = [
   },
   {
     question: "Are children invited?",
-    answer: "We love to see your little ones, please come with them.",
+    answer:
+      "As much as we love your little ones, we've kept our celebration an adults-only affair. We appreciate you making arrangements for childcare on the day.",
   },
   {
     question: "What time should I arrive?",
