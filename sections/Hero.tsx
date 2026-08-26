@@ -57,10 +57,10 @@ export function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, delay: 0.4 }}
-          className="font-serif text-6xl leading-none text-white sm:text-8xl"
+          className="flex flex-wrap items-baseline justify-center font-serif text-4xl leading-tight text-white sm:text-6xl sm:leading-none md:text-8xl"
         >
           {couple.brideName}
-          <span className="mx-4 text-[color:var(--gold-soft)]">&amp;</span>
+          <span className="mx-2 text-[color:var(--gold-soft)] sm:mx-4">&amp;</span>
           {couple.groomName}
         </motion.h1>
 

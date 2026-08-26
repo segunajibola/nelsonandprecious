@@ -30,9 +30,9 @@ export default function Landing() {
           {couple.hashtag}
         </span>
 
-        <h1 className="font-serif text-6xl leading-none text-white sm:text-8xl">
+        <h1 className="flex flex-wrap items-baseline justify-center font-serif text-4xl leading-tight text-white sm:text-6xl sm:leading-none md:text-8xl">
           {couple.brideName}
-          <span className="mx-4 text-[color:var(--gold-soft)]">&amp;</span>
+          <span className="mx-2 text-[color:var(--gold-soft)] sm:mx-4">&amp;</span>
           {couple.groomName}
         </h1>
 
