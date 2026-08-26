@@ -65,7 +65,7 @@ export function GiftRegistry() {
 
       <StaggerGroup className="mx-auto grid max-w-3xl gap-6 sm:grid-cols-2">
         {giftAccounts.map((account) => (
-          <Reveal key={account.accountNumber}>
+          <Reveal key={account.accountName}>
             <AccountCard account={account} />
           </Reveal>
         ))}

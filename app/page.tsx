@@ -55,7 +55,7 @@ export default function Landing() {
           </span>
           <div className="flex items-center gap-5">
             <a
-              href="/invitation/nelson-and-precious-invitation.png"
+              href="/invitation/nelson-and-precious-invitation.jpg"
               download
               className="inline-flex items-center gap-1.5 font-sans text-sm text-white/85 transition-colors hover:text-white"
             >

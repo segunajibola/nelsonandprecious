@@ -6,7 +6,7 @@ export interface LoveStoryEvent {
   image: string;
 }
 
-export type GalleryCategory = "Candid" | "Traditional" | "Proposal";
+export type GalleryCategory = "Candid" | "Studio" | "Proposal";
 
 export interface GalleryImage {
   id: string;

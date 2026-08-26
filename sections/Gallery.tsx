@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 const categories: (GalleryCategory | "All")[] = [
   "All",
   "Candid",
-  "Traditional",
+  "Studio",
   "Proposal",
 ];
 
