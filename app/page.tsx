@@ -15,7 +15,7 @@ export default function Landing() {
           alt={`${couple.brideName} and ${couple.groomName}`}
           fill
           priority
-          className="scale-110 object-cover blur-md"
+          className="scale-105 object-cover blur-sm"
           sizes="100vw"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/45 to-black/70" />
