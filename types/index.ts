@@ -100,3 +100,12 @@ export interface RsvpFormData {
   guests: string;
   message: string;
 }
+
+export interface RsvpResult {
+  ok: boolean;
+  name: string;
+  attending: "yes" | "no";
+  guests: number;
+  accessCode?: string;
+  qrToken?: string;
+}

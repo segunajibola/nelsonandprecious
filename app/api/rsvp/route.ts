@@ -1,7 +1,112 @@
 import { Resend } from "resend";
 import type { RsvpFormData } from "@/types";
 
-async function sendFallbackEmail(data: RsvpFormData & { submittedAt: string }) {
+const AIRTABLE_TOKEN = process.env.AIRTABLE_TOKEN;
+const AIRTABLE_BASE_ID = process.env.AIRTABLE_BASE_ID;
+const AIRTABLE_TABLE_NAME = process.env.AIRTABLE_TABLE_NAME;
+
+// Characters chosen to avoid visual ambiguity (no I, O, 0, 1). 32 chars so
+// byte % 32 has no modulo bias against the 0-255 range of a random byte.
+const ACCESS_CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+const ACCESS_CODE_LENGTH = 5;
+const ACCESS_CODE_PREFIX = "WED-";
+const MAX_ACCESS_CODE_ATTEMPTS = 8;
+
+interface ValidatedRsvp {
+  name: string;
+  email: string;
+  phone: string;
+  attending: "yes" | "no";
+  guests: number;
+  message: string;
+}
+
+function validateRsvp(data: Partial<RsvpFormData>): { error: string } | { data: ValidatedRsvp } {
+  const name = typeof data.name === "string" ? data.name.trim() : "";
+  if (!name) return { error: "Please tell us your name." };
+  if (name.length > 200) return { error: "That name looks too long — please shorten it." };
+
+  if (data.attending !== "yes" && data.attending !== "no") {
+    return { error: "Please let us know if you'll be attending." };
+  }
+
+  const email = typeof data.email === "string" ? data.email.trim() : "";
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return { error: "Please enter a valid email address." };
+  }
+
+  const phone = typeof data.phone === "string" ? data.phone.trim() : "";
+  const message = typeof data.message === "string" ? data.message.trim().slice(0, 2000) : "";
+
+  const guestsRaw = Number(data.guests);
+  const guests = Number.isFinite(guestsRaw) && guestsRaw >= 1 ? Math.min(Math.floor(guestsRaw), 20) : 1;
+
+  return { data: { name, email, phone, attending: data.attending, guests, message } };
+}
+
+function airtableConfigured() {
+  return Boolean(AIRTABLE_TOKEN && AIRTABLE_BASE_ID && AIRTABLE_TABLE_NAME);
+}
+
+function airtableUrl(query?: string) {
+  const base = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(AIRTABLE_TABLE_NAME!)}`;
+  return query ? `${base}?${query}` : base;
+}
+
+function generateAccessCode(): string {
+  const bytes = new Uint8Array(ACCESS_CODE_LENGTH);
+  crypto.getRandomValues(bytes);
+  let suffix = "";
+  for (let i = 0; i < ACCESS_CODE_LENGTH; i++) {
+    suffix += ACCESS_CODE_ALPHABET[bytes[i] % ACCESS_CODE_ALPHABET.length];
+  }
+  return `${ACCESS_CODE_PREFIX}${suffix}`;
+}
+
+function generateQrToken(): string {
+  const bytes = new Uint8Array(32);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+async function accessCodeExists(code: string): Promise<boolean> {
+  const formula = `{Access code} = "${code}"`;
+  const res = await fetch(airtableUrl(`filterByFormula=${encodeURIComponent(formula)}&maxRecords=1`), {
+    headers: { Authorization: `Bearer ${AIRTABLE_TOKEN}` },
+  });
+
+  if (!res.ok) throw new Error(`Airtable lookup failed with status ${res.status}`);
+  const body = (await res.json()) as { records: unknown[] };
+  return body.records.length > 0;
+}
+
+async function generateUniqueAccessCode(): Promise<string> {
+  for (let attempt = 0; attempt < MAX_ACCESS_CODE_ATTEMPTS; attempt++) {
+    const code = generateAccessCode();
+    if (!(await accessCodeExists(code))) return code;
+  }
+  throw new Error("Could not generate a unique access code after several attempts.");
+}
+
+async function createAirtableGuest(fields: Record<string, unknown>) {
+  const res = await fetch(airtableUrl(), {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${AIRTABLE_TOKEN}`,
+      "Content-Type": "application/json",
+    },
+    // typecast lets Airtable coerce/create select options for fields like
+    // "Will you attend?" without needing to know the exact option casing in advance.
+    body: JSON.stringify({ records: [{ fields }], typecast: true }),
+  });
+
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`Airtable create failed with status ${res.status}: ${body}`);
+  }
+}
+
+async function sendFallbackEmail(data: Omit<RsvpFormData, "guests"> & { guests: number; submittedAt: string }) {
   const apiKey = process.env.RESEND_API_KEY;
   const to = process.env.RSVP_NOTIFICATION_EMAIL;
   const from = process.env.RESEND_FROM_EMAIL;
@@ -36,29 +141,78 @@ async function sendFallbackEmail(data: RsvpFormData & { submittedAt: string }) {
 }
 
 export async function POST(request: Request) {
-  const data = (await request.json()) as RsvpFormData;
-
-  if (!data.name || !data.attending) {
-    return Response.json({ error: "Missing required fields." }, { status: 400 });
+  let raw: Partial<RsvpFormData>;
+  try {
+    raw = (await request.json()) as Partial<RsvpFormData>;
+  } catch {
+    return Response.json({ error: "Invalid request body." }, { status: 400 });
   }
 
-  const payload = { ...data, submittedAt: new Date().toISOString() };
+  const validation = validateRsvp(raw);
+  if ("error" in validation) {
+    return Response.json({ error: validation.error }, { status: 400 });
+  }
+  const { name, email, phone, attending, guests, message } = validation.data;
+
+  if (airtableConfigured()) {
+    try {
+      let accessCode: string | null = null;
+      let qrToken: string | null = null;
+
+      // Only guests who are attending get a check-in code — there's nothing to check in otherwise.
+      if (attending === "yes") {
+        accessCode = await generateUniqueAccessCode();
+        qrToken = generateQrToken();
+      }
+
+      const fields: Record<string, unknown> = {
+        Name: name,
+        "Will you attend?": attending === "yes" ? "Yes" : "No",
+        "Number of guests": guests,
+      };
+      if (email) fields["Email"] = email;
+      if (phone) fields["Phone"] = phone;
+      if (message) fields["Message to the couple"] = message;
+      if (accessCode) fields["Access code"] = accessCode;
+      if (qrToken) fields["QR code"] = qrToken;
+      // "Checked In" and "Check-In time" are intentionally never set here —
+      // only the check-in flow (not yet built) is allowed to write those.
+
+      await createAirtableGuest(fields);
+
+      return Response.json({
+        ok: true,
+        name,
+        attending,
+        guests,
+        accessCode: accessCode ?? undefined,
+        qrToken: qrToken ?? undefined,
+      });
+    } catch (error) {
+      console.error("Airtable RSVP save failed, falling back to email:", error);
+      // Fall through to the legacy path below so the RSVP still reaches the couple —
+      // just without a check-in code, since it was never persisted to Airtable.
+    }
+  }
+
+  const submittedAt = new Date().toISOString();
   const webhookUrl = process.env.GOOGLE_SHEETS_WEBHOOK_URL;
+  const fallbackPayload = { name, email, phone, attending, guests, message, submittedAt };
 
   if (webhookUrl) {
     try {
       const res = await fetch(webhookUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(fallbackPayload),
       });
 
       if (!res.ok) throw new Error(`Sheet webhook responded with ${res.status}`);
-      return Response.json({ ok: true });
+      return Response.json({ ok: true, name, attending, guests });
     } catch (error) {
       console.error("RSVP sheet submission failed, trying email fallback:", error);
-      if (await sendFallbackEmail(payload)) {
-        return Response.json({ ok: true });
+      if (await sendFallbackEmail(fallbackPayload)) {
+        return Response.json({ ok: true, name, attending, guests });
       }
       return Response.json(
         { error: "We couldn't save your RSVP right now. Please try again shortly." },
@@ -67,9 +221,8 @@ export async function POST(request: Request) {
     }
   }
 
-  // No sheet configured — email is the only path.
-  if (await sendFallbackEmail(payload)) {
-    return Response.json({ ok: true });
+  if (await sendFallbackEmail(fallbackPayload)) {
+    return Response.json({ ok: true, name, attending, guests });
   }
 
   return Response.json(

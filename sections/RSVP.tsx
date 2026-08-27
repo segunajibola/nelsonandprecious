@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import confetti from "canvas-confetti";
-import { CircleCheck, LoaderCircle } from "lucide-react";
-import type { RsvpFormData } from "@/types";
+import { CircleCheck, KeyRound, LoaderCircle, QrCode } from "lucide-react";
+import type { RsvpFormData, RsvpResult } from "@/types";
 import { couple } from "@/lib/data";
 import { Section } from "@/components/ui/Section";
 import { SectionHeading } from "@/components/ui/SectionHeading";
@@ -39,6 +39,7 @@ function fireConfetti() {
 export function RSVP() {
   const [form, setForm] = useState<RsvpFormData>(initialForm);
   const [submitted, setSubmitted] = useState(false);
+  const [result, setResult] = useState<RsvpResult | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -60,11 +61,12 @@ export function RSVP() {
         body: JSON.stringify(form),
       });
 
+      const body = await res.json().catch(() => null);
       if (!res.ok) {
-        const body = await res.json().catch(() => null);
         throw new Error(body?.error || "Something went wrong.");
       }
 
+      setResult(body as RsvpResult);
       setSubmitted(true);
       fireConfetti();
     } catch (err) {
@@ -101,16 +103,44 @@ export function RSVP() {
                 >
                   <CircleCheck size={56} className="text-[color:var(--gold)]" />
                 </motion.div>
-                <h3 className="font-serif text-3xl text-[color:var(--ink)]">Thank You, {form.name}!</h3>
+                <h3 className="font-serif text-3xl text-[color:var(--ink)]">Thank You, {result?.name ?? form.name}!</h3>
                 <p className="max-w-md font-sans text-sm text-[color:var(--ink-muted)]">
-                  {form.attending === "yes"
+                  {result?.attending === "yes"
                     ? "We can't wait to celebrate with you! A confirmation has been noted."
                     : "We're sorry you can't make it, but thank you for letting us know — you'll be in our hearts."}
                 </p>
+
+                {result?.attending === "yes" && result?.accessCode && (
+                  <div className="mt-2 flex w-full max-w-sm flex-col items-center gap-4 rounded-2xl border border-[color:var(--border-soft)] bg-[color:var(--surface)] p-6">
+                    <p className="font-sans text-xs uppercase tracking-wide text-[color:var(--ink-muted)]">
+                      Guests: {result.guests}
+                    </p>
+
+                    <div className="flex flex-col items-center gap-1.5">
+                      <span className="flex items-center gap-1.5 font-sans text-xs uppercase tracking-wide text-[color:var(--ink-muted)]">
+                        <KeyRound size={13} /> Your Access Code
+                      </span>
+                      <span className="font-serif text-2xl tracking-[0.15em] text-[color:var(--gold)]">
+                        {result.accessCode}
+                      </span>
+                    </div>
+
+                    <div className="flex h-32 w-32 flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-[color:var(--border-soft)] text-[color:var(--ink-muted)]">
+                      <QrCode size={28} />
+                      <span className="font-sans text-[0.65rem]">QR code coming soon</span>
+                    </div>
+
+                    <p className="font-sans text-xs text-[color:var(--ink-muted)]">
+                      Save a screenshot of this code — present it or your access code at the door.
+                    </p>
+                  </div>
+                )}
+
                 <Button
                   variant="secondary"
                   onClick={() => {
                     setSubmitted(false);
+                    setResult(null);
                     setForm(initialForm);
                   }}
                 >
