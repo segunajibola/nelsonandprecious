@@ -1,9 +1,13 @@
 import { Resend } from "resend";
 import type { RsvpFormData } from "@/types";
-
-const AIRTABLE_TOKEN = process.env.AIRTABLE_TOKEN;
-const AIRTABLE_BASE_ID = process.env.AIRTABLE_BASE_ID;
-const AIRTABLE_TABLE_NAME = process.env.AIRTABLE_TABLE_NAME;
+import {
+  airtableConfigured,
+  createRecord,
+  escapeFormulaValue,
+  findInviteByCode,
+  findRecordByFormula,
+  updateRecord,
+} from "@/lib/airtable";
 
 // Characters chosen to avoid visual ambiguity (no I, O, 0, 1). 32 chars so
 // byte % 32 has no modulo bias against the 0-255 range of a random byte.
@@ -19,9 +23,12 @@ interface ValidatedRsvp {
   attending: "yes" | "no";
   guests: number;
   message: string;
+  inviteCode: string;
 }
 
-function validateRsvp(data: Partial<RsvpFormData>): { error: string } | { data: ValidatedRsvp } {
+function validateRsvp(
+  data: Partial<RsvpFormData> & { inviteCode?: string },
+): { error: string } | { data: ValidatedRsvp } {
   const name = typeof data.name === "string" ? data.name.trim() : "";
   if (!name) return { error: "Please tell us your name." };
   if (name.length > 200) return { error: "That name looks too long — please shorten it." };
@@ -37,20 +44,12 @@ function validateRsvp(data: Partial<RsvpFormData>): { error: string } | { data: 
 
   const phone = typeof data.phone === "string" ? data.phone.trim() : "";
   const message = typeof data.message === "string" ? data.message.trim().slice(0, 2000) : "";
+  const inviteCode = typeof data.inviteCode === "string" ? data.inviteCode.trim() : "";
 
   const guestsRaw = Number(data.guests);
   const guests = Number.isFinite(guestsRaw) && guestsRaw >= 1 ? Math.min(Math.floor(guestsRaw), 20) : 1;
 
-  return { data: { name, email, phone, attending: data.attending, guests, message } };
-}
-
-function airtableConfigured() {
-  return Boolean(AIRTABLE_TOKEN && AIRTABLE_BASE_ID && AIRTABLE_TABLE_NAME);
-}
-
-function airtableUrl(query?: string) {
-  const base = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(AIRTABLE_TABLE_NAME!)}`;
-  return query ? `${base}?${query}` : base;
+  return { data: { name, email, phone, attending: data.attending, guests, message, inviteCode } };
 }
 
 function generateAccessCode(): string {
@@ -70,14 +69,8 @@ function generateQrToken(): string {
 }
 
 async function accessCodeExists(code: string): Promise<boolean> {
-  const formula = `{Access code} = "${code}"`;
-  const res = await fetch(airtableUrl(`filterByFormula=${encodeURIComponent(formula)}&maxRecords=1`), {
-    headers: { Authorization: `Bearer ${AIRTABLE_TOKEN}` },
-  });
-
-  if (!res.ok) throw new Error(`Airtable lookup failed with status ${res.status}`);
-  const body = (await res.json()) as { records: unknown[] };
-  return body.records.length > 0;
+  const record = await findRecordByFormula(`{Access code} = "${escapeFormulaValue(code)}"`);
+  return record !== null;
 }
 
 async function generateUniqueAccessCode(): Promise<string> {
@@ -86,24 +79,6 @@ async function generateUniqueAccessCode(): Promise<string> {
     if (!(await accessCodeExists(code))) return code;
   }
   throw new Error("Could not generate a unique access code after several attempts.");
-}
-
-async function createAirtableGuest(fields: Record<string, unknown>) {
-  const res = await fetch(airtableUrl(), {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${AIRTABLE_TOKEN}`,
-      "Content-Type": "application/json",
-    },
-    // typecast lets Airtable coerce/create select options for fields like
-    // "Will you attend?" without needing to know the exact option casing in advance.
-    body: JSON.stringify({ records: [{ fields }], typecast: true }),
-  });
-
-  if (!res.ok) {
-    const body = await res.text().catch(() => "");
-    throw new Error(`Airtable create failed with status ${res.status}: ${body}`);
-  }
 }
 
 async function sendFallbackEmail(data: Omit<RsvpFormData, "guests"> & { guests: number; submittedAt: string }) {
@@ -141,9 +116,9 @@ async function sendFallbackEmail(data: Omit<RsvpFormData, "guests"> & { guests: 
 }
 
 export async function POST(request: Request) {
-  let raw: Partial<RsvpFormData>;
+  let raw: Partial<RsvpFormData> & { inviteCode?: string };
   try {
-    raw = (await request.json()) as Partial<RsvpFormData>;
+    raw = (await request.json()) as Partial<RsvpFormData> & { inviteCode?: string };
   } catch {
     return Response.json({ error: "Invalid request body." }, { status: 400 });
   }
@@ -152,10 +127,33 @@ export async function POST(request: Request) {
   if ("error" in validation) {
     return Response.json({ error: validation.error }, { status: 400 });
   }
-  const { name, email, phone, attending, guests, message } = validation.data;
+  const { name, email, phone, attending, guests, message, inviteCode } = validation.data;
 
   if (airtableConfigured()) {
     try {
+      // A personal invite link caps how many guests this specific family can bring.
+      // The cap is re-checked here from Airtable — never trusted from the client —
+      // since the browser could otherwise just submit any number.
+      let invite: { recordId: string; maxGuests: number } | null = null;
+      if (inviteCode) {
+        const found = await findInviteByCode(inviteCode);
+        if (!found) {
+          return Response.json(
+            { error: "This invite link isn't valid. Please use the link from your invitation, or contact us directly." },
+            { status: 400 },
+          );
+        }
+        if (guests > found.maxGuests) {
+          return Response.json(
+            {
+              error: `Your invitation allows up to ${found.maxGuests} guest${found.maxGuests === 1 ? "" : "s"}. Please adjust your guest count.`,
+            },
+            { status: 400 },
+          );
+        }
+        invite = { recordId: found.recordId, maxGuests: found.maxGuests };
+      }
+
       let accessCode: string | null = null;
       let qrToken: string | null = null;
 
@@ -166,10 +164,12 @@ export async function POST(request: Request) {
       }
 
       const fields: Record<string, unknown> = {
-        Name: name,
         "Will you attend?": attending === "yes" ? "Yes" : "No",
         "Number of guests": guests,
       };
+      // Invite rows already have their Name set by the couple — only set it
+      // here for guests who came through the open (non-personalized) form.
+      if (!invite) fields["Name"] = name;
       if (email) fields["Email"] = email;
       if (phone) fields["Phone"] = phone;
       if (message) fields["Message to the couple"] = message;
@@ -178,7 +178,11 @@ export async function POST(request: Request) {
       // "Checked In" and "Check-In time" are intentionally never set here —
       // only the check-in flow (not yet built) is allowed to write those.
 
-      await createAirtableGuest(fields);
+      if (invite) {
+        await updateRecord(invite.recordId, fields);
+      } else {
+        await createRecord(fields);
+      }
 
       return Response.json({
         ok: true,

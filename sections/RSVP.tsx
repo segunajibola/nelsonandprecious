@@ -13,15 +13,6 @@ import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { FormField, SelectInput, TextArea, TextInput } from "@/components/ui/FormField";
 
-const initialForm: RsvpFormData = {
-  name: "",
-  email: "",
-  phone: "",
-  attending: "",
-  guests: "1",
-  message: "",
-};
-
 function fireConfetti() {
   const colors = ["#1c2841", "#ffb98a", "#ffd9b3", "#fffaf5"];
   confetti({
@@ -36,7 +27,28 @@ function fireConfetti() {
   }, 250);
 }
 
-export function RSVP() {
+export function RSVP({
+  inviteCode,
+  guestName,
+  maxGuests,
+}: {
+  /** Personal invite code from /rsvp/[code] — omit for the open, public RSVP form. */
+  inviteCode?: string;
+  /** Pre-set name for a personal invite — locks the Name field instead of leaving it editable. */
+  guestName?: string;
+  /** Caps the Number of Guests field for a personal invite (1..maxGuests instead of freeform). */
+  maxGuests?: number;
+}) {
+  const isPersonalized = Boolean(inviteCode && guestName);
+  const initialForm: RsvpFormData = {
+    name: guestName ?? "",
+    email: "",
+    phone: "",
+    attending: "",
+    guests: "1",
+    message: "",
+  };
+
   const [form, setForm] = useState<RsvpFormData>(initialForm);
   const [submitted, setSubmitted] = useState(false);
   const [result, setResult] = useState<RsvpResult | null>(null);
@@ -58,7 +70,7 @@ export function RSVP() {
       const res = await fetch("/api/rsvp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(inviteCode ? { ...form, inviteCode } : form),
       });
 
       const body = await res.json().catch(() => null);
@@ -75,6 +87,10 @@ export function RSVP() {
       setSubmitting(false);
     }
   };
+
+  const guestOptions = maxGuests && maxGuests > 1
+    ? Array.from({ length: Math.min(maxGuests, 20) }, (_, i) => i + 1)
+    : null;
 
   return (
     <Section id="rsvp" className="bg-[color:var(--surface)]/40">
@@ -136,16 +152,18 @@ export function RSVP() {
                   </div>
                 )}
 
-                <Button
-                  variant="secondary"
-                  onClick={() => {
-                    setSubmitted(false);
-                    setResult(null);
-                    setForm(initialForm);
-                  }}
-                >
-                  Submit Another Response
-                </Button>
+                {!isPersonalized && (
+                  <Button
+                    variant="secondary"
+                    onClick={() => {
+                      setSubmitted(false);
+                      setResult(null);
+                      setForm(initialForm);
+                    }}
+                  >
+                    Submit Another Response
+                  </Button>
+                )}
               </motion.div>
             ) : (
               <motion.form
@@ -160,7 +178,16 @@ export function RSVP() {
                   Fields marked <span className="text-[color:var(--gold)]">*</span> are required — everything else is optional.
                 </p>
                 <FormField label="Name" htmlFor="name" required className="sm:col-span-2">
-                  <TextInput id="name" required value={form.name} onChange={handleChange("name")} />
+                  {isPersonalized ? (
+                    <p
+                      id="name"
+                      className="w-full rounded-xl border border-[color:var(--border-soft)] bg-[color:var(--surface)] px-4 py-3 font-sans text-sm text-[color:var(--ink)]"
+                    >
+                      {form.name}
+                    </p>
+                  ) : (
+                    <TextInput id="name" required value={form.name} onChange={handleChange("name")} />
+                  )}
                 </FormField>
                 <FormField label="Email" htmlFor="email">
                   <TextInput id="email" type="email" value={form.email} onChange={handleChange("email")} />
@@ -175,14 +202,27 @@ export function RSVP() {
                     <option value="no">Regretfully declines</option>
                   </SelectInput>
                 </FormField>
-                <FormField label="Number of Guests" htmlFor="guests">
-                  <TextInput
-                    id="guests"
-                    type="number"
-                    min={1}
-                    value={form.guests}
-                    onChange={handleChange("guests")}
-                  />
+                <FormField
+                  label={guestOptions ? `Number of Guests (up to ${maxGuests})` : "Number of Guests"}
+                  htmlFor="guests"
+                >
+                  {guestOptions ? (
+                    <SelectInput id="guests" value={form.guests} onChange={handleChange("guests")}>
+                      {guestOptions.map((n) => (
+                        <option key={n} value={n}>
+                          {n}
+                        </option>
+                      ))}
+                    </SelectInput>
+                  ) : (
+                    <TextInput
+                      id="guests"
+                      type="number"
+                      min={1}
+                      value={form.guests}
+                      onChange={handleChange("guests")}
+                    />
+                  )}
                 </FormField>
                 <FormField label="Message to the Couple" htmlFor="message" className="sm:col-span-2">
                   <TextArea
