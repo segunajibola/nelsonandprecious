@@ -15,16 +15,14 @@ export const themeInitScript = `
 (function() {
   try {
     var stored = localStorage.getItem('wedding-theme');
-    var theme = stored === 'dark' || stored === 'light'
-      ? stored
-      : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    var theme = stored === 'dark' || stored === 'light' ? stored : 'dark';
     document.documentElement.classList.toggle('dark', theme === 'dark');
   } catch (e) {}
 })();
 `;
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("light");
+  const [theme, setTheme] = useState<Theme>("dark");
 
   useEffect(() => {
     // The inline pre-hydration script (themeInitScript) sets the "dark" class before

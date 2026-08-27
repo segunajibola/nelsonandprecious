@@ -17,13 +17,13 @@ import type {
 export const couple = {
   brideName: "Precious",
   groomName: "Nelson",
-  brideFullName: "Precious Chiamaka Eze",
-  groomFullName: "Nelson Ifeanyi Okafor",
+  brideFullName: "Opeyemi Precious Bamidele",
+  groomFullName: "Nelson Ugochukwu Nwabekee",
   hashtag: "#PNLockedIn",
   weddingDateISO: "2026-09-26T12:00:00",
   weddingDateDisplay: "September 26, 2026",
   tagline: "Two Hearts, One Beginning",
-  heroImage: "/images/couple-hero.jpeg",
+  heroImage: "/images/couple-formal-3.jpeg",
 };
 
 export const navLinks = [
@@ -41,7 +41,7 @@ export const loveStory: LoveStoryEvent[] = [
   {
     id: "first-date",
     title: "First Date",
-    date: "June 2020",
+    date: "June 2024",
     description:
       "Nelson invited Precious for coffee that turned into a four-hour conversation. They talked until the cafe closed and neither of them wanted the night to end.",
     image: "/images/couple-first-date.jpeg",
@@ -63,7 +63,7 @@ export const loveStory: LoveStoryEvent[] = [
     image: "/images/wedding-invitation.jpeg",
   },
 ];
-1;
+
 export const aboutEachOther: AboutEachOtherEntry[] = [
   {
     from: "Nelson",
@@ -239,7 +239,7 @@ export const weddingColors: WeddingColor[] = [
 export const bridalParty: WeddingPartyMember[] = [
   {
     id: "bride",
-    name: "Precious Chiamaka Eze",
+    name: "Opeyemi Precious Bamidele",
     role: "Bride",
     message: "Marrying my best friend and my greatest adventure.",
   },
@@ -264,7 +264,7 @@ export const asoEbi: WeddingPartyMember[] = [
 export const groomParty: WeddingPartyMember[] = [
   {
     id: "groom",
-    name: "Nelson Ifeanyi Okafor",
+    name: "Nelson Ugochukwu Nwabekee",
     role: "Groom",
     message:
       "Every day with her feels like the beginning of something beautiful.",
@@ -375,17 +375,16 @@ export const faqs: FaqItem[] = [
   },
 ];
 
-// Placeholder only — replace with the couple's real bank details before sharing this site with guests.
 export const giftAccounts: BankAccountInfo[] = [
   {
-    bankName: "Add bank name",
-    accountNumber: "0000000000",
-    accountName: "Nelson Ifeanyi Okafor (update before sharing)",
+    bankName: "Opay",
+    accountNumber: "8057454364",
+    accountName: "Nelson Ugochukwu Nwabekee",
   },
   {
-    bankName: "Add bank name",
-    accountNumber: "0000000000",
-    accountName: "Precious Chiamaka Eze (update before sharing)",
+    bankName: "Opay",
+    accountNumber: "7067649742",
+    accountName: "Opeyemi Precious Bamidele",
   },
 ];
 
