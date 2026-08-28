@@ -43,7 +43,7 @@ export const loveStory: LoveStoryEvent[] = [
     title: "First Date",
     date: "June 2024",
     description:
-      "Nelson invited Precious for coffee that. turned into a four-hour conversation. They talked until the cafe closed and neither of them wanted the night to end.",
+      "Nelson invited Precious for coffee that turned into a four-hour conversation. They talked until the cafe closed and neither of them wanted the night to end.",
     image: "/images/couple-first-date.jpeg",
   },
   {
