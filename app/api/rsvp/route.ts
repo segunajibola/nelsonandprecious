@@ -164,12 +164,12 @@ export async function POST(request: Request) {
       }
 
       const fields: Record<string, unknown> = {
+        Name: name,
         "Will you attend?": attending === "yes" ? "Yes" : "No",
         "Number of guests": guests,
       };
-      // Invite rows already have their Name set by the couple — only set it
-      // here for guests who came through the open (non-personalized) form.
-      if (!invite) fields["Name"] = name;
+      // For invite rows, this overwrites the couple's private placeholder
+      // label with the guest's own name — the whole point of letting them type it.
       if (email) fields["Email"] = email;
       if (phone) fields["Phone"] = phone;
       if (message) fields["Message to the couple"] = message;

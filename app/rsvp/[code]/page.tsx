@@ -31,7 +31,5 @@ export default async function PersonalInvitePage(props: PageProps<"/rsvp/[code]"
     );
   }
 
-  return (
-    <RsvpPageClient inviteCode={code} guestName={invite.name} maxGuests={invite.maxGuests} />
-  );
+  return <RsvpPageClient inviteCode={code} maxGuests={invite.maxGuests} />;
 }

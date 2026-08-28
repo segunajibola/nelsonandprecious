@@ -27,27 +27,25 @@ function fireConfetti() {
   }, 250);
 }
 
+const initialForm: RsvpFormData = {
+  name: "",
+  email: "",
+  phone: "",
+  attending: "",
+  guests: "1",
+  message: "",
+};
+
 export function RSVP({
   inviteCode,
-  guestName,
   maxGuests,
 }: {
   /** Personal invite code from /rsvp/[code] — omit for the open, public RSVP form. */
   inviteCode?: string;
-  /** Pre-set name for a personal invite — locks the Name field instead of leaving it editable. */
-  guestName?: string;
   /** Caps the Number of Guests field for a personal invite (1..maxGuests instead of freeform). */
   maxGuests?: number;
 }) {
-  const isPersonalized = Boolean(inviteCode && guestName);
-  const initialForm: RsvpFormData = {
-    name: guestName ?? "",
-    email: "",
-    phone: "",
-    attending: "",
-    guests: "1",
-    message: "",
-  };
+  const isPersonalized = Boolean(inviteCode);
 
   const [form, setForm] = useState<RsvpFormData>(initialForm);
   const [submitted, setSubmitted] = useState(false);
@@ -178,16 +176,7 @@ export function RSVP({
                   Fields marked <span className="text-[color:var(--gold)]">*</span> are required — everything else is optional.
                 </p>
                 <FormField label="Name" htmlFor="name" required className="sm:col-span-2">
-                  {isPersonalized ? (
-                    <p
-                      id="name"
-                      className="w-full rounded-xl border border-[color:var(--border-soft)] bg-[color:var(--surface)] px-4 py-3 font-sans text-sm text-[color:var(--ink)]"
-                    >
-                      {form.name}
-                    </p>
-                  ) : (
-                    <TextInput id="name" required value={form.name} onChange={handleChange("name")} />
-                  )}
+                  <TextInput id="name" required value={form.name} onChange={handleChange("name")} />
                 </FormField>
                 <FormField label="Email" htmlFor="email">
                   <TextInput id="email" type="email" value={form.email} onChange={handleChange("email")} />

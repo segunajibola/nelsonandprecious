@@ -39,6 +39,10 @@ export function Footer() {
           >
             Segun
           </a>
+          {" · "}
+          <a href="/admin" className="hover:underline">
+            Admin
+          </a>
         </p>
       </Container>
     </footer>

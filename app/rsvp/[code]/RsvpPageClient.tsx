@@ -12,11 +12,9 @@ import { couple } from "@/lib/data";
 
 export function RsvpPageClient({
   inviteCode,
-  guestName,
   maxGuests,
 }: {
   inviteCode: string;
-  guestName: string;
   maxGuests: number;
 }) {
   const { isPlaying, toggle } = useBackgroundMusic("/music/chike-apple.mp3");
@@ -30,7 +28,7 @@ export function RsvpPageClient({
         <Container className="flex flex-col items-center gap-3 pt-32 pb-4 text-center sm:pt-40">
           <Heart size={22} className="text-[color:var(--gold)]" fill="currentColor" />
           <h1 className="font-serif text-4xl text-[color:var(--ink)] sm:text-5xl">
-            You&apos;re Invited, {guestName}!
+            You&apos;re Invited!
           </h1>
           <p className="max-w-md font-sans text-sm text-[color:var(--ink-muted)] sm:text-base">
             {couple.groomName} &amp; {couple.brideName} would love to have you at their wedding on{" "}
@@ -39,7 +37,7 @@ export function RsvpPageClient({
           </p>
         </Container>
 
-        <RSVP inviteCode={inviteCode} guestName={guestName} maxGuests={maxGuests} />
+        <RSVP inviteCode={inviteCode} maxGuests={maxGuests} />
       </main>
 
       <Footer />
