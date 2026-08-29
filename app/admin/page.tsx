@@ -162,7 +162,8 @@ export default function AdminPage() {
       <h1 className="font-serif text-3xl text-[color:var(--ink)]">Guest Invites</h1>
       <p className="mt-1 font-sans text-sm text-[color:var(--ink-muted)]">
         Generate a personal RSVP link for a family, capped at however many guests they&apos;re
-        allowed to bring. They&apos;ll type their own name when they RSVP.
+        allowed to bring. The name you enter here is shown on their invite and can&apos;t be
+        changed by them.
       </p>
 
       <form
@@ -171,12 +172,13 @@ export default function AdminPage() {
       >
         <div className="flex flex-1 flex-col gap-1.5">
           <label className="font-sans text-xs uppercase tracking-wide text-[color:var(--ink-muted)]">
-            Label (private note, not shown to guest)
+            Name shown on their invite <span className="text-[color:var(--gold)]">*</span>
           </label>
           <input
             value={label}
             onChange={(e) => setLabel(e.target.value)}
-            placeholder="e.g. Okafor Family"
+            placeholder="e.g. The Okafor Family"
+            required
             className="w-full rounded-xl border border-[color:var(--border-soft)] bg-[color:var(--surface)] px-4 py-2.5 font-sans text-sm text-[color:var(--ink)] outline-none focus:border-[color:var(--gold)]"
           />
         </div>

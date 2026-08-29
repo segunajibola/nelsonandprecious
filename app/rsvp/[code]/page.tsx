@@ -25,11 +25,13 @@ export default async function PersonalInvitePage(props: PageProps<"/rsvp/[code]"
             We couldn&apos;t find an invitation for this link. Please double-check the link from
             your invitation, or reach out to {couple.groomName} &amp; {couple.brideName} directly.
           </p>
-          <Button href="/details#rsvp">Go to the General RSVP</Button>
+          <Button href="https://wa.me/2348171982126" target="_blank" rel="noopener noreferrer">
+            Message Us on WhatsApp
+          </Button>
         </Container>
       </main>
     );
   }
 
-  return <RsvpPageClient inviteCode={code} maxGuests={invite.maxGuests} />;
+  return <RsvpPageClient inviteCode={code} guestName={invite.name} maxGuests={invite.maxGuests} />;
 }

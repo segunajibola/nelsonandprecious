@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import confetti from "canvas-confetti";
-import { CircleCheck, KeyRound, LoaderCircle, QrCode } from "lucide-react";
+import { CircleCheck, KeyRound, LoaderCircle, QrCode, Users } from "lucide-react";
 import type { RsvpFormData, RsvpResult } from "@/types";
 import { couple } from "@/lib/data";
 import { Section } from "@/components/ui/Section";
@@ -28,26 +28,27 @@ function fireConfetti() {
 }
 
 const initialForm: RsvpFormData = {
-  name: "",
   email: "",
   phone: "",
   attending: "",
   guests: "1",
   message: "",
+  inviteCode: "",
 };
 
 export function RSVP({
   inviteCode,
+  guestName,
   maxGuests,
 }: {
-  /** Personal invite code from /rsvp/[code] — omit for the open, public RSVP form. */
-  inviteCode?: string;
-  /** Caps the Number of Guests field for a personal invite (1..maxGuests instead of freeform). */
-  maxGuests?: number;
+  /** Personal invite code from /rsvp/[code]. */
+  inviteCode: string;
+  /** The invite's fixed, non-editable guest name — set by the couple, shown but never editable here. */
+  guestName: string;
+  /** Caps the Number of Guests field to 1..maxGuests. */
+  maxGuests: number;
 }) {
-  const isPersonalized = Boolean(inviteCode);
-
-  const [form, setForm] = useState<RsvpFormData>(initialForm);
+  const [form, setForm] = useState<RsvpFormData>({ ...initialForm, inviteCode });
   const [submitted, setSubmitted] = useState(false);
   const [result, setResult] = useState<RsvpResult | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -68,7 +69,7 @@ export function RSVP({
       const res = await fetch("/api/rsvp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(inviteCode ? { ...form, inviteCode } : form),
+        body: JSON.stringify(form),
       });
 
       const body = await res.json().catch(() => null);
@@ -86,9 +87,7 @@ export function RSVP({
     }
   };
 
-  const guestOptions = maxGuests && maxGuests > 1
-    ? Array.from({ length: Math.min(maxGuests, 20) }, (_, i) => i + 1)
-    : null;
+  const guestOptions = Array.from({ length: Math.min(maxGuests, 20) }, (_, i) => i + 1);
 
   return (
     <Section id="rsvp" className="bg-[color:var(--surface)]/40">
@@ -96,8 +95,17 @@ export function RSVP({
         eyebrow="RSVP"
         title="Join Our Celebration"
         description="Kindly respond by September 21, 2026 so we can prepare a seat with your name on it."
-        className="mb-16"
+        className="mb-8"
       />
+
+      <Reveal className="mx-auto mb-10 flex max-w-2xl justify-center">
+        <div className="flex items-center gap-2.5 rounded-full border-2 border-[color:var(--gold)] bg-[color:var(--gold)]/10 px-6 py-2.5">
+          <Users size={20} className="text-[color:var(--gold)]" />
+          <span className="font-serif text-lg font-bold text-[color:var(--gold)] sm:text-xl">
+            Your invitation covers up to {maxGuests} guest{maxGuests === 1 ? "" : "s"}
+          </span>
+        </div>
+      </Reveal>
 
       <Reveal className="mx-auto max-w-2xl">
         <Card>
@@ -117,10 +125,10 @@ export function RSVP({
                 >
                   <CircleCheck size={56} className="text-[color:var(--gold)]" />
                 </motion.div>
-                <h3 className="font-serif text-3xl text-[color:var(--ink)]">Thank You, {result?.name ?? form.name}!</h3>
+                <h3 className="font-serif text-3xl text-[color:var(--ink)]">Thank You, {result?.name ?? guestName}!</h3>
                 <p className="max-w-md font-sans text-sm text-[color:var(--ink-muted)]">
                   {result?.attending === "yes"
-                    ? "We can't wait to celebrate with you! A confirmation has been noted."
+                    ? "We can't wait to celebrate with you! A confirmation has been noted, and we've sent the details to your email."
                     : "We're sorry you can't make it, but thank you for letting us know — you'll be in our hearts."}
                 </p>
 
@@ -150,18 +158,16 @@ export function RSVP({
                   </div>
                 )}
 
-                {!isPersonalized && (
-                  <Button
-                    variant="secondary"
-                    onClick={() => {
-                      setSubmitted(false);
-                      setResult(null);
-                      setForm(initialForm);
-                    }}
-                  >
-                    Submit Another Response
-                  </Button>
-                )}
+                <Button
+                  variant="secondary"
+                  onClick={() => {
+                    setSubmitted(false);
+                    setResult(null);
+                    setForm({ ...initialForm, inviteCode });
+                  }}
+                >
+                  Update My Response
+                </Button>
               </motion.div>
             ) : (
               <motion.form
@@ -173,13 +179,18 @@ export function RSVP({
                 className="grid gap-5 sm:grid-cols-2"
               >
                 <p className="font-sans text-xs text-[color:var(--ink-muted)] sm:col-span-2">
-                  Fields marked <span className="text-[color:var(--gold)]">*</span> are required — everything else is optional.
+                  Fields marked <span className="text-[color:var(--gold)]">*</span> are required.
                 </p>
                 <FormField label="Name" htmlFor="name" required className="sm:col-span-2">
-                  <TextInput id="name" required value={form.name} onChange={handleChange("name")} />
+                  <p
+                    id="name"
+                    className="w-full rounded-xl border border-[color:var(--border-soft)] bg-[color:var(--surface)] px-4 py-3 font-sans text-sm text-[color:var(--ink)]"
+                  >
+                    {guestName}
+                  </p>
                 </FormField>
-                <FormField label="Email" htmlFor="email">
-                  <TextInput id="email" type="email" value={form.email} onChange={handleChange("email")} />
+                <FormField label="Email" htmlFor="email" required>
+                  <TextInput id="email" type="email" required value={form.email} onChange={handleChange("email")} />
                 </FormField>
                 <FormField label="Phone" htmlFor="phone">
                   <TextInput id="phone" type="tel" value={form.phone} onChange={handleChange("phone")} />
@@ -191,27 +202,14 @@ export function RSVP({
                     <option value="no">Regretfully declines</option>
                   </SelectInput>
                 </FormField>
-                <FormField
-                  label={guestOptions ? `Number of Guests (up to ${maxGuests})` : "Number of Guests"}
-                  htmlFor="guests"
-                >
-                  {guestOptions ? (
-                    <SelectInput id="guests" value={form.guests} onChange={handleChange("guests")}>
-                      {guestOptions.map((n) => (
-                        <option key={n} value={n}>
-                          {n}
-                        </option>
-                      ))}
-                    </SelectInput>
-                  ) : (
-                    <TextInput
-                      id="guests"
-                      type="number"
-                      min={1}
-                      value={form.guests}
-                      onChange={handleChange("guests")}
-                    />
-                  )}
+                <FormField label={`Number of Guests (up to ${maxGuests})`} htmlFor="guests">
+                  <SelectInput id="guests" value={form.guests} onChange={handleChange("guests")}>
+                    {guestOptions.map((n) => (
+                      <option key={n} value={n}>
+                        {n}
+                      </option>
+                    ))}
+                  </SelectInput>
                 </FormField>
                 <FormField label="Message to the Couple" htmlFor="message" className="sm:col-span-2">
                   <TextArea

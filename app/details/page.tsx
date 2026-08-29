@@ -9,7 +9,6 @@ import { Hero } from "@/sections/Hero";
 import { WeddingDetails } from "@/sections/WeddingDetails";
 import { VenueMap } from "@/sections/VenueMap";
 import { ZoomMeeting } from "@/sections/ZoomMeeting";
-import { RSVP } from "@/sections/RSVP";
 import { Schedule } from "@/sections/Schedule";
 import { ReceptionProgramme } from "@/sections/ReceptionProgramme";
 import { PhotoOrder } from "@/sections/PhotoOrder";
@@ -30,7 +29,6 @@ export default function DetailsPage() {
         <WeddingDetails />
         <VenueMap />
         <ZoomMeeting />
-        <RSVP />
         <Schedule />
         <ReceptionProgramme />
         <PhotoOrder />

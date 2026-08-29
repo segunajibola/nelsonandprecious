@@ -18,7 +18,7 @@ const jost = Jost({
 });
 
 const siteTitle = `${couple.brideName} & ${couple.groomName} | ${couple.weddingDateDisplay}`;
-const siteDescription = `Join ${couple.brideName} and ${couple.groomName} as they celebrate their wedding on ${couple.weddingDateDisplay}. Find our story, wedding details, and RSVP here.`;
+const siteDescription = `Join ${couple.brideName} and ${couple.groomName} as they celebrate their wedding on ${couple.weddingDateDisplay}. Find our story and wedding details here.`;
 
 export const metadata: Metadata = {
   title: siteTitle,

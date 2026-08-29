@@ -29,7 +29,6 @@ export const couple = {
 export const navLinks = [
   { label: "Home", href: "/" },
   { label: "Details", href: "/details" },
-  { label: "RSVP", href: "/details#rsvp" },
   { label: "Gallery", href: "/gallery#gallery" },
   { label: "Videos", href: "/gallery#videos" },
   { label: "Our Story", href: "/gallery#our-story" },

@@ -44,8 +44,8 @@ export default function Landing() {
 
         <div className="mt-4 flex flex-col gap-4 sm:flex-row">
           <Button href="/details">View Details</Button>
-          <Button variant="outline-light" href="/details#rsvp">
-            RSVP
+          <Button variant="outline-light" href="/gallery">
+            Gallery &amp; Our Story
           </Button>
         </div>
 

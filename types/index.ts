@@ -93,12 +93,12 @@ export interface AboutEachOtherEntry {
 }
 
 export interface RsvpFormData {
-  name: string;
   email: string;
   phone: string;
   attending: "yes" | "no" | "";
   guests: string;
   message: string;
+  inviteCode: string;
 }
 
 export interface RsvpResult {

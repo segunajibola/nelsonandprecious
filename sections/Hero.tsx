@@ -87,9 +87,9 @@ export function Hero() {
           transition={{ duration: 0.8, delay: 1 }}
           className="flex flex-col gap-4 sm:flex-row"
         >
-          <Button onClick={() => scrollToId("#rsvp")}>RSVP Now</Button>
-          <Button variant="outline-light" href="/gallery">
-            Gallery &amp; Our Story
+          <Button href="/gallery">Gallery &amp; Our Story</Button>
+          <Button variant="outline-light" href="https://wa.me/2348171982126" target="_blank" rel="noopener noreferrer">
+            Message Us on WhatsApp
           </Button>
         </motion.div>
       </motion.div>

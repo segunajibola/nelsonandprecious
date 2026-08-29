@@ -37,6 +37,9 @@ export async function POST(request: Request) {
   const maxGuestsRaw = Number(body?.maxGuests);
   const maxGuests = Number.isFinite(maxGuestsRaw) ? Math.floor(maxGuestsRaw) : NaN;
 
+  if (!label) {
+    return Response.json({ error: "Please enter a name for this invite — it's shown to the guest and can't be changed." }, { status: 400 });
+  }
   if (!Number.isFinite(maxGuests) || maxGuests < 1 || maxGuests > 20) {
     return Response.json({ error: "Max guests must be a number between 1 and 20." }, { status: 400 });
   }

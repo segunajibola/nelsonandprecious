@@ -87,20 +87,24 @@ export async function updateRecord(recordId: string, fields: Record<string, unkn
 
 export interface Invite {
   recordId: string;
+  name: string;
   maxGuests: number;
 }
 
-// Looks up a pre-seeded invite row by its "Invite code" column. The guest's
-// own Name is filled in later, when they actually submit the RSVP — the
-// pre-seeded row only needs an Invite code + Max guests to exist.
+// Looks up a pre-seeded invite row by its "Invite code" column. The Name on
+// that row (set by the couple when the invite was generated) is the guest's
+// fixed, non-editable display name — they can't change it when RSVPing.
 export async function findInviteByCode(code: string): Promise<Invite | null> {
   const record = await findRecordByFormula(`{Invite code} = "${escapeFormulaValue(code)}"`);
   if (!record) return null;
 
+  const name = typeof record.fields["Name"] === "string" ? (record.fields["Name"] as string) : "";
+  if (!name) return null;
+
   const maxGuestsRaw = record.fields["Max guests"];
   const maxGuests = typeof maxGuestsRaw === "number" && maxGuestsRaw >= 1 ? Math.floor(maxGuestsRaw) : 1;
 
-  return { recordId: record.id, maxGuests };
+  return { recordId: record.id, name, maxGuests };
 }
 
 const INVITE_CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -132,13 +136,13 @@ export interface CreatedInvite {
   label: string;
 }
 
-// Creates a new pre-seeded invite row. `label` is a private note for the
-// couple only (stored in the Name column until the guest overwrites it with
-// their own name on RSVP) — it's never shown to the guest.
+// Creates a new pre-seeded invite row. `label` becomes the guest's fixed,
+// non-editable display name on the RSVP form and in their confirmation email
+// — it's guest-facing, so the caller (the admin API) requires it to be set.
 export async function createInvite(maxGuests: number, label: string): Promise<CreatedInvite> {
   const inviteCode = await generateUniqueInviteCode();
   const record = await createRecord({
-    Name: label || "(unnamed invite)",
+    Name: label,
     "Max guests": maxGuests,
     "Invite code": inviteCode,
   });
