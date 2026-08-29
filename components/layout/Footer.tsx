@@ -40,7 +40,7 @@ export function Footer() {
             rel="noopener noreferrer"
             className="text-[color:var(--gold)] hover:underline"
           >
-            Segun
+            Segun.
           </a>
         </p>
         <a
@@ -49,7 +49,7 @@ export function Footer() {
           rel="noopener noreferrer"
           className="font-sans text-xs text-[color:var(--gold)] hover:underline"
         >
-          Want to create your wedding page?
+          Want to create your wedding page, click here.
         </a>
 
         <div className="mt-2 h-px w-24 bg-[color:var(--border-soft)]" />
