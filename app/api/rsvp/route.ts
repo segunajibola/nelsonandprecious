@@ -15,7 +15,7 @@ const SITE_URL = process.env.SITE_URL || "https://nelsonandprecious.vercel.app";
 // byte % 32 has no modulo bias against the 0-255 range of a random byte.
 const ACCESS_CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 const ACCESS_CODE_LENGTH = 5;
-const ACCESS_CODE_PREFIX = "WED-";
+const ACCESS_CODE_PREFIX = "PNWED-";
 const MAX_ACCESS_CODE_ATTEMPTS = 8;
 
 interface ValidatedRsvp {
@@ -27,8 +27,11 @@ interface ValidatedRsvp {
   inviteCode: string;
 }
 
-function validateRsvp(data: Partial<RsvpFormData>): { error: string } | { data: ValidatedRsvp } {
-  const inviteCode = typeof data.inviteCode === "string" ? data.inviteCode.trim() : "";
+function validateRsvp(
+  data: Partial<RsvpFormData>,
+): { error: string } | { data: ValidatedRsvp } {
+  const inviteCode =
+    typeof data.inviteCode === "string" ? data.inviteCode.trim() : "";
   if (!inviteCode) return { error: "An invite code is required." };
 
   if (data.attending !== "yes" && data.attending !== "no") {
@@ -36,18 +39,35 @@ function validateRsvp(data: Partial<RsvpFormData>): { error: string } | { data: 
   }
 
   const email = typeof data.email === "string" ? data.email.trim() : "";
-  if (!email) return { error: "Please enter your email address — that's how we'll send your confirmation." };
+  if (!email)
+    return {
+      error:
+        "Please enter your email address — that's how we'll send your confirmation.",
+    };
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return { error: "Please enter a valid email address." };
   }
 
   const phone = typeof data.phone === "string" ? data.phone.trim() : "";
-  const message = typeof data.message === "string" ? data.message.trim().slice(0, 2000) : "";
+  const message =
+    typeof data.message === "string" ? data.message.trim().slice(0, 2000) : "";
 
   const guestsRaw = Number(data.guests);
-  const guests = Number.isFinite(guestsRaw) && guestsRaw >= 1 ? Math.min(Math.floor(guestsRaw), 20) : 1;
+  const guests =
+    Number.isFinite(guestsRaw) && guestsRaw >= 1
+      ? Math.min(Math.floor(guestsRaw), 20)
+      : 1;
 
-  return { data: { email, phone, attending: data.attending, guests, message, inviteCode } };
+  return {
+    data: {
+      email,
+      phone,
+      attending: data.attending,
+      guests,
+      message,
+      inviteCode,
+    },
+  };
 }
 
 function generateAccessCode(): string {
@@ -67,7 +87,9 @@ function generateQrToken(): string {
 }
 
 async function accessCodeExists(code: string): Promise<boolean> {
-  const record = await findRecordByFormula(`{Access code} = "${escapeFormulaValue(code)}"`);
+  const record = await findRecordByFormula(
+    `{Access code} = "${escapeFormulaValue(code)}"`,
+  );
   return record !== null;
 }
 
@@ -76,7 +98,9 @@ async function generateUniqueAccessCode(): Promise<string> {
     const code = generateAccessCode();
     if (!(await accessCodeExists(code))) return code;
   }
-  throw new Error("Could not generate a unique access code after several attempts.");
+  throw new Error(
+    "Could not generate a unique access code after several attempts.",
+  );
 }
 
 // Notifies the couple directly — only used as a last resort if saving to
@@ -221,11 +245,15 @@ export async function POST(request: Request) {
   if ("error" in validation) {
     return Response.json({ error: validation.error }, { status: 400 });
   }
-  const { email, phone, attending, guests, message, inviteCode } = validation.data;
+  const { email, phone, attending, guests, message, inviteCode } =
+    validation.data;
 
   if (!airtableConfigured()) {
     return Response.json(
-      { error: "RSVP collection isn't configured yet. Please contact the couple directly." },
+      {
+        error:
+          "RSVP collection isn't configured yet. Please contact the couple directly.",
+      },
       { status: 500 },
     );
   }
@@ -236,7 +264,10 @@ export async function POST(request: Request) {
     const invite = await findInviteByCode(inviteCode);
     if (!invite) {
       return Response.json(
-        { error: "This invite link isn't valid. Please use the link from your invitation, or contact us directly." },
+        {
+          error:
+            "This invite link isn't valid. Please use the link from your invitation, or contact us directly.",
+        },
         { status: 400 },
       );
     }
@@ -301,7 +332,10 @@ export async function POST(request: Request) {
       submittedAt: new Date().toISOString(),
     });
     return Response.json(
-      { error: "We couldn't save your RSVP right now. Please try again shortly, or contact us directly." },
+      {
+        error:
+          "We couldn't save your RSVP right now. Please try again shortly, or contact us directly.",
+      },
       { status: 502 },
     );
   }

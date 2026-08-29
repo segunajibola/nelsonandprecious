@@ -28,20 +28,28 @@ export function RsvpPageClient({
 
       <main className="flex-1">
         <Container className="flex flex-col items-center gap-3 pt-32 pb-4 text-center sm:pt-40">
-          <Heart size={22} className="text-[color:var(--gold)]" fill="currentColor" />
+          <Heart
+            size={22}
+            className="text-[color:var(--gold)]"
+            fill="currentColor"
+          />
           <h1 className="font-serif text-4xl text-[color:var(--ink)] sm:text-5xl">
             You&apos;re Invited, {guestName}!
           </h1>
           <p className="max-w-md font-sans text-sm text-[color:var(--ink-muted)] sm:text-base">
-            {couple.groomName} &amp; {couple.brideName} would love to have you at their wedding on{" "}
-            {couple.weddingDateDisplay}.
+            {couple.groomName} &amp; {couple.brideName} would love to have you
+            at their wedding on {couple.weddingDateDisplay}.
           </p>
         </Container>
 
-        <RSVP inviteCode={inviteCode} guestName={guestName} maxGuests={maxGuests} />
+        <RSVP
+          inviteCode={inviteCode}
+          guestName={guestName}
+          maxGuests={maxGuests}
+        />
 
-        <Container className="flex flex-col items-center gap-4 pb-24 text-center">
-          <p className="font-sans text-sm text-[color:var(--ink-muted)]">
+        <Container className="flex flex-col items-center gap-4 py-24 text-center">
+          <p className="font-sans text-md text-[color:var(--ink-muted)]">
             Want to see more before you decide?
           </p>
           <div className="flex flex-col gap-3 sm:flex-row">
