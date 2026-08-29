@@ -5,6 +5,26 @@ import { Section } from "@/components/ui/Section";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Reveal, StaggerGroup } from "@/components/ui/Reveal";
 import { PartyCard } from "@/components/ui/PartyCard";
+import type { WeddingPartyMember } from "@/types";
+
+function PartyGroup({ title, members }: { title: string; members: WeddingPartyMember[] }) {
+  return (
+    <div className="mb-16 last:mb-0">
+      <Reveal>
+        <h3 className="mb-8 text-center font-serif text-2xl italic text-[color:var(--gold)]">
+          {title}
+        </h3>
+      </Reveal>
+      <StaggerGroup className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-5">
+        {members.map((member) => (
+          <Reveal key={member.id}>
+            <PartyCard member={member} />
+          </Reveal>
+        ))}
+      </StaggerGroup>
+    </div>
+  );
+}
 
 export function WeddingParty() {
   return (
@@ -16,65 +36,10 @@ export function WeddingParty() {
         className="mb-16"
       />
 
-      <div className="mb-16">
-        <Reveal>
-          <h3 className="mb-8 text-center font-serif text-2xl italic text-[color:var(--gold)]">
-            Bride&apos;s Side
-          </h3>
-        </Reveal>
-        <StaggerGroup className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-5">
-          {bridalParty.map((member) => (
-            <Reveal key={member.id}>
-              <PartyCard member={member} />
-            </Reveal>
-          ))}
-        </StaggerGroup>
-      </div>
-
-      <div className="mb-16">
-        <Reveal>
-          <h3 className="mb-8 text-center font-serif text-2xl italic text-[color:var(--gold)]">
-            Aso Ebi
-          </h3>
-        </Reveal>
-
-        <p className="mb-6 text-center font-sans text-xs font-medium uppercase tracking-[0.2em] text-[color:var(--ink-muted)]">
-          Asoebi Ladies
-        </p>
-        <StaggerGroup className="mb-10 grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-5">
-          {asoEbiLadies.map((member) => (
-            <Reveal key={member.id}>
-              <PartyCard member={member} />
-            </Reveal>
-          ))}
-        </StaggerGroup>
-
-        <p className="mb-6 text-center font-sans text-xs font-medium uppercase tracking-[0.2em] text-[color:var(--ink-muted)]">
-          Asoebi Men
-        </p>
-        <StaggerGroup className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-5">
-          {asoEbiMen.map((member) => (
-            <Reveal key={member.id}>
-              <PartyCard member={member} />
-            </Reveal>
-          ))}
-        </StaggerGroup>
-      </div>
-
-      <div>
-        <Reveal>
-          <h3 className="mb-8 text-center font-serif text-2xl italic text-[color:var(--gold)]">
-            Groom&apos;s Side
-          </h3>
-        </Reveal>
-        <StaggerGroup className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-5">
-          {groomParty.map((member) => (
-            <Reveal key={member.id}>
-              <PartyCard member={member} />
-            </Reveal>
-          ))}
-        </StaggerGroup>
-      </div>
+      <PartyGroup title="Bride's Side" members={bridalParty} />
+      <PartyGroup title="Aso Ebi Ladies" members={asoEbiLadies} />
+      <PartyGroup title="Groom's Side" members={groomParty} />
+      <PartyGroup title="Aso Ebi Men" members={asoEbiMen} />
     </Section>
   );
 }

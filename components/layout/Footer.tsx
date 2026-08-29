@@ -4,6 +4,9 @@ import { ArrowUp } from "lucide-react";
 import { couple } from "@/lib/data";
 import { Container } from "@/components/ui/Container";
 
+const WHATSAPP_MESSAGE = `Hi Segun! I saw ${couple.groomName} & ${couple.brideName}'s wedding website and I'd like to create one for my own wedding.`;
+const WHATSAPP_LINK = `https://wa.me/2348105729893?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`;
+
 export function Footer() {
   return (
     <footer className="border-t border-[color:var(--border-soft)] bg-[color:var(--surface)] py-14">
@@ -40,6 +43,17 @@ export function Footer() {
             Segun
           </a>
         </p>
+        <a
+          href={WHATSAPP_LINK}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-sans text-xs text-[color:var(--gold)] hover:underline"
+        >
+          Want to create your wedding page?
+        </a>
+
+        <div className="mt-2 h-px w-24 bg-[color:var(--border-soft)]" />
+
         <p className="text-center font-sans text-xs text-[color:var(--ink-muted)]">
           <a href="/admin" className="hover:underline">
             Admin
