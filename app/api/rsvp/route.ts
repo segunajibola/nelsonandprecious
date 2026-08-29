@@ -9,7 +9,7 @@ import {
   updateRecord,
 } from "@/lib/airtable";
 
-const SITE_URL = process.env.SITE_URL || "https://nelsonandprecious.vercel.app";
+const SITE_URL = process.env.SITE_URL || "https://preciousandnelson.vercel.app";
 
 // Characters chosen to avoid visual ambiguity (no I, O, 0, 1). 32 chars so
 // byte % 32 has no modulo bias against the 0-255 range of a random byte.
