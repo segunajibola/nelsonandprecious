@@ -1,6 +1,6 @@
 "use client";
 
-import { asoEbi, bridalParty, groomParty } from "@/lib/data";
+import { asoEbiLadies, asoEbiMen, bridalParty, groomParty } from "@/lib/data";
 import { Section } from "@/components/ui/Section";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Reveal, StaggerGroup } from "@/components/ui/Reveal";
@@ -37,8 +37,23 @@ export function WeddingParty() {
             Aso Ebi
           </h3>
         </Reveal>
+
+        <p className="mb-6 text-center font-sans text-xs font-medium uppercase tracking-[0.2em] text-[color:var(--ink-muted)]">
+          Asoebi Ladies
+        </p>
+        <StaggerGroup className="mb-10 grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-5">
+          {asoEbiLadies.map((member) => (
+            <Reveal key={member.id}>
+              <PartyCard member={member} />
+            </Reveal>
+          ))}
+        </StaggerGroup>
+
+        <p className="mb-6 text-center font-sans text-xs font-medium uppercase tracking-[0.2em] text-[color:var(--ink-muted)]">
+          Asoebi Men
+        </p>
         <StaggerGroup className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-5">
-          {asoEbi.map((member) => (
+          {asoEbiMen.map((member) => (
             <Reveal key={member.id}>
               <PartyCard member={member} />
             </Reveal>

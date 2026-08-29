@@ -142,17 +142,25 @@ export const galleryImages: GalleryImage[] = [
     height: 2000,
   },
   {
-    id: "g9",
-    src: "/images/couple-candid-3.jpeg",
-    alt: "Nelson and Precious out and about together",
+    id: "g10",
+    src: "/images/couple-candid-4.jpeg",
+    alt: "Nelson and Precious dressed up together outdoors",
     category: "Candid",
     width: 1500,
     height: 2000,
   },
   {
-    id: "g10",
-    src: "/images/couple-candid-4.jpeg",
-    alt: "Nelson and Precious dressed up together outdoors",
+    id: "g11",
+    src: "/images/couple-candid-5.jpeg",
+    alt: "Nelson and Precious celebrating a graduation together",
+    category: "Candid",
+    width: 1500,
+    height: 2000,
+  },
+  {
+    id: "g12",
+    src: "/images/couple-candid-6.jpeg",
+    alt: "Nelson and Precious sharing a playful selfie",
     category: "Candid",
     width: 1500,
     height: 2000,
@@ -171,6 +179,20 @@ export const videoMoments: VideoItem[] = [
     id: "v2",
     src: "/images/couple-clip-2.mp4",
     caption: "Nelson and Precious in motion",
+    width: 576,
+    height: 1024,
+  },
+  {
+    id: "v3",
+    src: "/images/couple-clip-3.mp4",
+    caption: "Another candid moment with Nelson and Precious",
+    width: 1024,
+    height: 576,
+  },
+  {
+    id: "v4",
+    src: "/images/couple-clip-4.mp4",
+    caption: "Nelson and Precious having fun together",
     width: 576,
     height: 1024,
   },
@@ -238,40 +260,51 @@ export const weddingColors: WeddingColor[] = [
 export const bridalParty: WeddingPartyMember[] = [
   {
     id: "bride",
-    name: "Opeyemi Precious Bamidele",
+    name: "Bamidele Precious Opeyemi",
     role: "Bride",
     message: "Marrying my best friend and my greatest adventure.",
   },
-  { id: "bm1", name: "Chiamaka Nwosu", role: "Bride's Maid" },
-  { id: "bm2", name: "Blessing Umeh", role: "Bride's Maid" },
-  { id: "bm3", name: "Faith Okonkwo", role: "Bride's Maid" },
-  { id: "bm4", name: "Ifeoma Chukwu", role: "Bride's Maid" },
-  { id: "bm5", name: "Grace Adeyemi", role: "Bride's Maid" },
-  { id: "bm6", name: "Victory Nnamdi", role: "Bride's Maid" },
+  { id: "chief-bridesmaid", name: "Andrew Blessing Adeola", role: "Chief Bride's Maid" },
+  { id: "little-bride", name: "Ataikun Rejoice", role: "Little Bride" },
+  { id: "bt1", name: "Titilayo Oyindamola L.", role: "Bridal Train" },
+  { id: "bt2", name: "Okpere Jemimah Oseiwe", role: "Bridal Train" },
+  { id: "bt3", name: "Abigeal Abike Olumuyiwa", role: "Bridal Train" },
+  { id: "bt4", name: "Olajumoke Ojo", role: "Bridal Train" },
 ];
 
-export const asoEbi: WeddingPartyMember[] = [
-  { id: "ae1", name: "Ugochi Eze", role: "Chief Bride's Maid" },
-  { id: "ae2", name: "Nkechi Eze", role: "Aso Ebi" },
-  { id: "ae3", name: "Adaeze Okoro", role: "Aso Ebi" },
-  { id: "ae4", name: "Oluwaseun Bakare", role: "Aso Ebi" },
-  { id: "ae5", name: "Rita Anyanwu", role: "Aso Ebi" },
-  { id: "ae6", name: "Temitope Alade", role: "Aso Ebi" },
-  { id: "ae7", name: "Chidinma Okeke", role: "Aso Ebi" },
+export const asoEbiLadies: WeddingPartyMember[] = [
+  { id: "al1", name: "Sodunke Mary Boluwatife", role: "Asoebi Lady" },
+  { id: "al2", name: "Odujebe Ayomide", role: "Asoebi Lady" },
+  { id: "al3", name: "Nkechi Cecilia Nwana", role: "Asoebi Lady" },
+  { id: "al4", name: "Ariavie Favour", role: "Asoebi Lady" },
+  { id: "al5", name: "Ayomide Andrew", role: "Asoebi Lady" },
+  { id: "al6", name: "Ojetunde Jolaoluwa", role: "Asoebi Lady" },
+  { id: "al7", name: "Praise Boldwill", role: "Asoebi Lady" },
+];
+
+export const asoEbiMen: WeddingPartyMember[] = [
+  { id: "am1", name: "Nwokeji Precious", role: "Asoebi Man" },
+  { id: "am2", name: "Nkemdirim Darlington", role: "Asoebi Man" },
+  { id: "am3", name: "Oyeleye Olawale", role: "Asoebi Man" },
+  { id: "am4", name: "Egbeigwe Tobechukwu", role: "Asoebi Man" },
+  { id: "am5", name: "Omeriaye Rukky", role: "Asoebi Man" },
+  { id: "am6", name: "Moses Bright", role: "Asoebi Man" },
 ];
 
 export const groomParty: WeddingPartyMember[] = [
   {
     id: "groom",
-    name: "Nelson Ugochukwu Nwabekee",
+    name: "Nwabekee Nelson Ugochukwu",
     role: "Groom",
     message:
       "Every day with her feels like the beginning of something beautiful.",
   },
-  { id: "gm1", name: "Emmanuel Okafor", role: "Groomsman" },
-  { id: "gm2", name: "David Chukwuemeka", role: "Groomsman" },
-  { id: "gm3", name: "Samuel Eze", role: "Groomsman" },
-  { id: "gm4", name: "Tobi Adebayo", role: "Groomsman" },
+  { id: "best-man", name: "Nnabuife Marvelous", role: "Best Man" },
+  { id: "ring-bearer", name: "Omon Jaiden", role: "Ring Bearer" },
+  { id: "gm1", name: "Inyamah Misheal", role: "Groomsman" },
+  { id: "gm2", name: "Opiah Frank", role: "Groomsman" },
+  { id: "gm3", name: "Opiah Welfare", role: "Groomsman" },
+  { id: "gm4", name: "Onuoha Michael", role: "Groomsman" },
 ];
 
 export const schedule: ScheduleItem[] = [
