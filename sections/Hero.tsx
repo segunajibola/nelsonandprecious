@@ -88,7 +88,7 @@ export function Hero() {
           className="flex flex-col gap-4 sm:flex-row"
         >
           <Button href="/gallery">Gallery &amp; Our Story</Button>
-          <Button variant="outline-light" href="https://wa.me/2348171982126" target="_blank" rel="noopener noreferrer">
+          <Button variant="outline-light" href="https://wa.me/2348171982162" target="_blank" rel="noopener noreferrer">
             Message Us on WhatsApp
           </Button>
         </motion.div>

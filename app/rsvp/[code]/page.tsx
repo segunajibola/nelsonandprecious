@@ -25,7 +25,7 @@ export default async function PersonalInvitePage(props: PageProps<"/rsvp/[code]"
             We couldn&apos;t find an invitation for this link. Please double-check the link from
             your invitation, or reach out to {couple.groomName} &amp; {couple.brideName} directly.
           </p>
-          <Button href="https://wa.me/2348171982126" target="_blank" rel="noopener noreferrer">
+          <Button href="https://wa.me/2348171982162" target="_blank" rel="noopener noreferrer">
             Message Us on WhatsApp
           </Button>
         </Container>

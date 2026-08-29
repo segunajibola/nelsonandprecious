@@ -39,7 +39,8 @@ export function Footer() {
           >
             Segun
           </a>
-          {" · "}
+        </p>
+        <p className="text-center font-sans text-xs text-[color:var(--ink-muted)]">
           <a href="/admin" className="hover:underline">
             Admin
           </a>
