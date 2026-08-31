@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import confetti from "canvas-confetti";
-import { CircleCheck, KeyRound, LoaderCircle, QrCode, Users } from "lucide-react";
+import { CalendarX, CircleCheck, KeyRound, LoaderCircle, Users } from "lucide-react";
 import type { RsvpFormData, RsvpResult } from "@/types";
 import { couple } from "@/lib/data";
 import { Section } from "@/components/ui/Section";
@@ -40,6 +40,7 @@ export function RSVP({
   inviteCode,
   guestName,
   maxGuests,
+  deadlinePassed = false,
 }: {
   /** Personal invite code from /rsvp/[code]. */
   inviteCode: string;
@@ -47,6 +48,8 @@ export function RSVP({
   guestName: string;
   /** Caps the Number of Guests field to 1..maxGuests. */
   maxGuests: number;
+  /** When true, the form is replaced with a closed-RSVP message instead of being submittable. */
+  deadlinePassed?: boolean;
 }) {
   const [form, setForm] = useState<RsvpFormData>({ ...initialForm, inviteCode });
   const [submitted, setSubmitted] = useState(false);
@@ -94,7 +97,7 @@ export function RSVP({
       <SectionHeading
         eyebrow="RSVP"
         title="Join Our Celebration"
-        description="Kindly respond by September 21, 2026 so we can prepare a seat with your name on it."
+        description={`Kindly respond by ${couple.rsvpDeadlineDisplay} so we can prepare a seat with your name on it.`}
         className="mb-8"
       />
 
@@ -147,10 +150,16 @@ export function RSVP({
                       </span>
                     </div>
 
-                    <div className="flex h-32 w-32 flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-[color:var(--border-soft)] text-[color:var(--ink-muted)]">
-                      <QrCode size={28} />
-                      <span className="font-sans text-[0.65rem]">QR code coming soon</span>
-                    </div>
+                    {result.qrToken && (
+                      // eslint-disable-next-line @next/next/no-img-element -- token-keyed dynamic image, not a static asset next/image can optimize
+                      <img
+                        src={`/api/qr/${encodeURIComponent(result.qrToken)}`}
+                        alt="Check-in QR code"
+                        width={128}
+                        height={128}
+                        className="h-32 w-32 rounded-xl border border-[color:var(--border-soft)]"
+                      />
+                    )}
 
                     <p className="font-sans text-xs text-[color:var(--ink-muted)]">
                       Save a screenshot of this code — present it or your access code at the door.
@@ -168,6 +177,21 @@ export function RSVP({
                 >
                   Update My Response
                 </Button>
+              </motion.div>
+            ) : deadlinePassed ? (
+              <motion.div
+                key="closed"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="flex flex-col items-center gap-3 py-10 text-center"
+              >
+                <CalendarX size={40} className="text-[color:var(--gold)]" />
+                <h3 className="font-serif text-2xl text-[color:var(--ink)]">RSVP Is Now Closed</h3>
+                <p className="max-w-sm font-sans text-sm text-[color:var(--ink-muted)]">
+                  The RSVP deadline ({couple.rsvpDeadlineDisplay}) has passed. If you still need to
+                  respond, please reach out to us directly.
+                </p>
               </motion.div>
             ) : (
               <motion.form

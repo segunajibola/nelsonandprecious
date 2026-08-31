@@ -71,6 +71,15 @@ export async function createRecord(fields: Record<string, unknown>): Promise<Air
   return data.records[0];
 }
 
+export async function getRecord(recordId: string): Promise<AirtableRecord | null> {
+  const res = await fetch(`https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(AIRTABLE_TABLE_NAME!)}/${recordId}`, {
+    headers: authHeaders(),
+  });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`Airtable get failed with status ${res.status}`);
+  return (await res.json()) as AirtableRecord;
+}
+
 export async function updateRecord(recordId: string, fields: Record<string, unknown>): Promise<AirtableRecord> {
   const res = await fetch(airtableUrl(), {
     method: "PATCH",
@@ -105,6 +114,38 @@ export async function findInviteByCode(code: string): Promise<Invite | null> {
   const maxGuests = typeof maxGuestsRaw === "number" && maxGuestsRaw >= 1 ? Math.floor(maxGuestsRaw) : 1;
 
   return { recordId: record.id, name, maxGuests };
+}
+
+export interface GuestRecord {
+  recordId: string;
+  name: string;
+  email: string;
+  attending: "yes" | "no" | null;
+  guests: number | null;
+  accessCode: string | null;
+  qrToken: string | null;
+}
+
+// Richer lookup than findInviteByCode — used by the "resend my confirmation"
+// flow, which needs the email on file and whatever the guest already
+// answered (if anything) rather than just the invite's cap.
+export async function findGuestByInviteCode(code: string): Promise<GuestRecord | null> {
+  const record = await findRecordByFormula(`{Invite code} = "${escapeFormulaValue(code)}"`);
+  if (!record) return null;
+
+  const fields = record.fields;
+  const attendingRaw = fields["Will you attend?"];
+  const guestsRaw = fields["Number of guests"];
+
+  return {
+    recordId: record.id,
+    name: typeof fields["Name"] === "string" ? (fields["Name"] as string) : "",
+    email: typeof fields["Email"] === "string" ? (fields["Email"] as string) : "",
+    attending: attendingRaw === "Yes" ? "yes" : attendingRaw === "No" ? "no" : null,
+    guests: typeof guestsRaw === "number" ? guestsRaw : null,
+    accessCode: typeof fields["Access code"] === "string" ? (fields["Access code"] as string) : null,
+    qrToken: typeof fields["QR code"] === "string" ? (fields["QR code"] as string) : null,
+  };
 }
 
 const INVITE_CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -157,10 +198,16 @@ export interface InviteListItem {
   inviteCode: string;
   attending: "yes" | "no" | null;
   guestsConfirmed: number | null;
+  accessCode: string | null;
+  qrToken: string | null;
+  checkedIn: boolean;
+  checkInTime: string | null;
 }
 
 // Lists every row that has an Invite code set — i.e. every invite the couple
-// has generated, whether or not the guest has responded yet.
+// has generated, whether or not the guest has responded yet. Powers both the
+// invite-generation admin page and the check-in dashboard (which does all of
+// its searching/matching client-side against this one fetched list).
 export async function listInvites(): Promise<InviteListItem[]> {
   const records = await listRecordsByFormula(`NOT({Invite code} = "")`);
   return records
@@ -178,7 +225,41 @@ export async function listInvites(): Promise<InviteListItem[]> {
         inviteCode: typeof fields["Invite code"] === "string" ? (fields["Invite code"] as string) : "",
         attending,
         guestsConfirmed: typeof guestsRaw === "number" ? guestsRaw : null,
+        accessCode: typeof fields["Access code"] === "string" ? (fields["Access code"] as string) : null,
+        qrToken: typeof fields["QR code"] === "string" ? (fields["QR code"] as string) : null,
+        checkedIn: fields["Checked In"] === true,
+        checkInTime: typeof fields["Check-In time"] === "string" ? (fields["Check-In time"] as string) : null,
       };
     })
     .sort((a, b) => b.createdTime.localeCompare(a.createdTime));
+}
+
+export interface CheckInResult {
+  recordId: string;
+  name: string;
+  guests: number;
+  alreadyCheckedIn: boolean;
+  checkInTime: string;
+}
+
+// Idempotent: if the guest was already checked in, this returns their
+// original check-in time untouched rather than overwriting it — the
+// "prevent double entry" behavior the whole system exists for.
+export async function checkInGuest(recordId: string): Promise<CheckInResult> {
+  const record = await getRecord(recordId);
+  if (!record) throw new Error("Guest record not found.");
+
+  const fields = record.fields;
+  const name = typeof fields["Name"] === "string" ? (fields["Name"] as string) : "";
+  const guests = typeof fields["Number of guests"] === "number" ? (fields["Number of guests"] as number) : 0;
+  const alreadyCheckedIn = fields["Checked In"] === true;
+
+  if (alreadyCheckedIn) {
+    const existingTime = typeof fields["Check-In time"] === "string" ? (fields["Check-In time"] as string) : "";
+    return { recordId, name, guests, alreadyCheckedIn: true, checkInTime: existingTime };
+  }
+
+  const checkInTime = new Date().toISOString();
+  await updateRecord(recordId, { "Checked In": true, "Check-In time": checkInTime });
+  return { recordId, name, guests, alreadyCheckedIn: false, checkInTime };
 }

@@ -22,6 +22,8 @@ export const couple = {
   hashtag: "#PNLockedIn",
   weddingDateISO: "2026-09-26T12:00:00",
   weddingDateDisplay: "September 26, 2026",
+  rsvpDeadlineISO: "2026-09-21T23:59:59",
+  rsvpDeadlineDisplay: "September 21, 2026",
   tagline: "Two Hearts, One Beginning",
   heroImage: "/images/couple-formal-3.jpeg",
 };

@@ -1,6 +1,6 @@
 import { Resend } from "resend";
 import type { RsvpFormData } from "@/types";
-import { ceremonyVenue, couple, event } from "@/lib/data";
+import { couple } from "@/lib/data";
 import {
   airtableConfigured,
   escapeFormulaValue,
@@ -8,8 +8,7 @@ import {
   findRecordByFormula,
   updateRecord,
 } from "@/lib/airtable";
-
-const SITE_URL = process.env.SITE_URL || "https://preciousandnelson.vercel.app";
+import { sendGuestConfirmationEmail } from "@/lib/guestEmail";
 
 // Characters chosen to avoid visual ambiguity (no I, O, 0, 1). 32 chars so
 // byte % 32 has no modulo bias against the 0-255 range of a random byte.
@@ -148,91 +147,6 @@ async function sendFallbackEmail(data: {
   }
 }
 
-// Sends the guest their own confirmation — the whole reason email is required.
-async function sendGuestConfirmationEmail(data: {
-  to: string;
-  name: string;
-  attending: "yes" | "no";
-  guests: number;
-  accessCode: string | null;
-}) {
-  const apiKey = process.env.RESEND_API_KEY;
-  const from = process.env.RESEND_FROM_EMAIL;
-  if (!apiKey || !from) return false;
-
-  const detailsUrl = `${SITE_URL}/details`;
-
-  try {
-    const resend = new Resend(apiKey);
-
-    if (data.attending === "no") {
-      const { error } = await resend.emails.send({
-        from,
-        to: data.to,
-        subject: `We'll miss you — ${couple.groomName} & ${couple.brideName}'s Wedding`,
-        html: `
-          <div style="font-family: Georgia, serif; max-width: 480px; margin: 0 auto; color: #1c2841;">
-            <p>Dear ${escapeHtml(data.name)},</p>
-            <p>Thank you for letting us know you won't be able to join us on ${couple.weddingDateDisplay}. You'll be in our hearts on the day.</p>
-            <p style="margin-top: 32px;">With love,<br />${couple.groomName} &amp; ${couple.brideName}</p>
-          </div>
-        `,
-      });
-      if (error) throw error;
-      return true;
-    }
-
-    const { error } = await resend.emails.send({
-      from,
-      to: data.to,
-      subject: `You're Confirmed! 🎉 ${couple.groomName} & ${couple.brideName}'s Wedding`,
-      html: `
-        <div style="font-family: Georgia, serif; max-width: 480px; margin: 0 auto; color: #1c2841;">
-          <p>Dear ${escapeHtml(data.name)},</p>
-          <p>We're so glad you'll be celebrating with us! Here's everything you need for the day.</p>
-
-          <div style="background: #fdf6f0; border-radius: 12px; padding: 20px; margin: 24px 0;">
-            <p style="margin: 0 0 12px; font-weight: bold;">Ceremony — ${escapeHtml(ceremonyVenue.name)}</p>
-            <p style="margin: 0 0 16px; font-size: 14px;">${couple.weddingDateDisplay}, ${escapeHtml(ceremonyVenue.time)}</p>
-            <p style="margin: 0 0 12px; font-weight: bold;">Reception — ${escapeHtml(event.name)}</p>
-            <p style="margin: 0 0 4px; font-size: 14px;">${couple.weddingDateDisplay}, ${escapeHtml(event.time)}</p>
-            <p style="margin: 0 0 16px; font-size: 14px;">${escapeHtml(event.address)}</p>
-            ${event.dressCode ? `<p style="margin: 0; font-size: 14px;"><strong>Dress code:</strong> ${escapeHtml(event.dressCode)}</p>` : ""}
-          </div>
-
-          <p>Guests confirmed: <strong>${data.guests}</strong></p>
-
-          <div style="text-align: center; background: #1c2841; border-radius: 12px; padding: 20px; margin: 24px 0;">
-            <p style="margin: 0 0 6px; color: #ffd9b3; font-size: 12px; letter-spacing: 2px; text-transform: uppercase;">Your Access Code</p>
-            <p style="margin: 0; color: #ffffff; font-size: 28px; letter-spacing: 4px; font-weight: bold;">${data.accessCode}</p>
-          </div>
-
-          <p style="font-size: 14px;">Please present this code at the entrance on the day — a screenshot works fine.</p>
-
-          <p style="text-align: center; margin: 32px 0;">
-            <a href="${detailsUrl}" style="background: #1c2841; color: #ffffff; padding: 12px 28px; border-radius: 999px; text-decoration: none; font-size: 14px;">View Full Wedding Details</a>
-          </p>
-
-          <p style="margin-top: 32px;">With love,<br />${couple.groomName} &amp; ${couple.brideName}</p>
-        </div>
-      `,
-    });
-    if (error) throw error;
-    return true;
-  } catch (error) {
-    console.error("Guest confirmation email failed:", error);
-    return false;
-  }
-}
-
-function escapeHtml(value: string) {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
-
 export async function POST(request: Request) {
   let raw: Partial<RsvpFormData>;
   try {
@@ -255,6 +169,15 @@ export async function POST(request: Request) {
           "RSVP collection isn't configured yet. Please contact the couple directly.",
       },
       { status: 500 },
+    );
+  }
+
+  if (Date.now() > new Date(couple.rsvpDeadlineISO).getTime()) {
+    return Response.json(
+      {
+        error: `The RSVP deadline (${couple.rsvpDeadlineDisplay}) has passed. Please contact us directly if you still need to respond.`,
+      },
+      { status: 400 },
     );
   }
 
@@ -300,7 +223,8 @@ export async function POST(request: Request) {
     if (qrToken) fields["QR code"] = qrToken;
     // Name is fixed by the couple at invite-creation time and is never
     // touched here. "Checked In" / "Check-In time" are intentionally never
-    // set here either — only the (not yet built) check-in flow writes those.
+    // set here either — only the check-in dashboard (see checkInGuest in
+    // lib/airtable.ts) is allowed to write those.
 
     await updateRecord(invite.recordId, fields);
 
@@ -310,6 +234,7 @@ export async function POST(request: Request) {
       attending,
       guests,
       accessCode,
+      qrToken,
     });
 
     return Response.json({

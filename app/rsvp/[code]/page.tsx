@@ -10,6 +10,16 @@ export const metadata: Metadata = {
   title: `You're Invited | ${couple.brideName} & ${couple.groomName}`,
 };
 
+// Plain helper, not a component — keeps the request-time Date.now() read out
+// of the page component body itself, since that read is what makes this
+// route render fresh per-request rather than get statically cached.
+function getDeadlineState(deadlineISO: string) {
+  const msRemaining = new Date(deadlineISO).getTime() - Date.now();
+  const deadlinePassed = msRemaining <= 0;
+  const daysLeft = deadlinePassed ? 0 : Math.ceil(msRemaining / (1000 * 60 * 60 * 24));
+  return { deadlinePassed, daysLeft };
+}
+
 export default async function PersonalInvitePage(props: PageProps<"/rsvp/[code]">) {
   const { code } = await props.params;
 
@@ -33,5 +43,15 @@ export default async function PersonalInvitePage(props: PageProps<"/rsvp/[code]"
     );
   }
 
-  return <RsvpPageClient inviteCode={code} guestName={invite.name} maxGuests={invite.maxGuests} />;
+  const { deadlinePassed, daysLeft } = getDeadlineState(couple.rsvpDeadlineISO);
+
+  return (
+    <RsvpPageClient
+      inviteCode={code}
+      guestName={invite.name}
+      maxGuests={invite.maxGuests}
+      deadlinePassed={deadlinePassed}
+      daysLeft={daysLeft}
+    />
+  );
 }
