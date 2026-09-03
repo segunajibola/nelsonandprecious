@@ -191,13 +191,6 @@ export const videoMoments: VideoItem[] = [
     width: 1024,
     height: 576,
   },
-  {
-    id: "v4",
-    src: "/images/couple-clip-4.mp4",
-    caption: "Nelson and Precious having fun together",
-    width: 576,
-    height: 1024,
-  },
 ];
 
 export const ceremonyVenue: VenueDetail = {
@@ -256,6 +249,7 @@ export const accommodation: AccommodationInfo = {
 export const zoomMeeting: ZoomMeetingInfo = {
   link: "https://us05web.zoom.us/j/7796674079?pwd=LYPpInD47pRQTZTd9y44hhiLkEuSe8.1",
   meetingId: "779 667 4079",
+  passcode: "Xz412N",
   note: "Can't make it in person? Livestream details will be shared here closer to the wedding day — check back soon.",
 };
 

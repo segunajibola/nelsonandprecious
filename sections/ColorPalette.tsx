@@ -15,7 +15,7 @@ export function ColorPalette() {
         className="mb-12"
       />
 
-      <div className="w-[50%] mx-auto">
+      <div className="mx-auto flex w-[50%] flex-col items-center gap-6">
         {weddingColors.map((color, index) => (
           <Reveal key={color.name} delay={index * 0.08}>
             <div className="group flex flex-col items-center gap-4 rounded-3xl border border-[color:var(--border-soft)] bg-[color:var(--surface)] p-6 transition-transform duration-300 hover:-translate-y-1">
