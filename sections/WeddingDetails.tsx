@@ -1,6 +1,6 @@
 "use client";
 
-import { Church, MapPin, PartyPopper, Shirt } from "lucide-react";
+import { House, MapPin, PartyPopper, Shirt } from "lucide-react";
 import { ceremonyVenue, event } from "@/lib/data";
 import type { VenueDetail } from "@/types";
 import { Section } from "@/components/ui/Section";
@@ -21,10 +21,10 @@ function DetailRow({ icon: Icon, label, value }: { icon: React.ElementType; labe
   );
 }
 
-function VenueCard({ venue }: { venue: VenueDetail }) {
+function VenueCard({ venue, icon: Icon }: { venue: VenueDetail; icon: React.ElementType }) {
   return (
     <Card className="flex h-full w-full flex-col gap-5">
-      <Church size={28} className="text-[color:var(--gold)]" />
+      <Icon size={28} className="text-[color:var(--gold)]" />
       <h3 className="font-serif text-2xl text-[color:var(--ink)]">{venue.heading}</h3>
       <div className="flex flex-col gap-4">
         <DetailRow icon={MapPin} label="Venue" value={venue.name} />
@@ -54,10 +54,10 @@ export function WeddingDetails() {
 
       <div className="mx-auto grid max-w-4xl gap-8 sm:grid-cols-2">
         <Reveal>
-          <VenueCard venue={ceremonyVenue} />
+          <VenueCard venue={ceremonyVenue} icon={House} />
         </Reveal>
         <Reveal delay={0.1}>
-          <VenueCard venue={event} />
+          <VenueCard venue={event} icon={PartyPopper} />
         </Reveal>
       </div>
     </Section>
