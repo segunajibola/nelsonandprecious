@@ -251,6 +251,8 @@ export const zoomMeeting: ZoomMeetingInfo = {
   meetingId: "779 667 4079",
   passcode: "Xz412N",
   note: "Can't make it in person? Livestream details will be shared here closer to the wedding day — check back soon.",
+  image:
+    "https://images.unsplash.com/photo-1588196749597-9ff075ee6b5b?auto=format&fit=crop&w=800&q=80",
 };
 
 export const weddingColors: WeddingColor[] = [

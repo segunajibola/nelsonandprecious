@@ -78,6 +78,7 @@ export interface ZoomMeetingInfo {
   meetingId?: string;
   passcode?: string;
   note: string;
+  image?: string;
 }
 
 export interface PhotoOrderItem {
