@@ -202,10 +202,13 @@ export const videoMoments: VideoItem[] = [
 
 export const ceremonyVenue: VenueDetail = {
   heading: "Wedding Ceremony",
-  name: "Kingdom Hall",
+  name: "Kingdom Hall of Jehovah's Witness",
   date: "September 26, 2026",
   time: "10:30 AM – 11:30 AM",
-  address: "Address to be shared soon — check back closer to the date.",
+  address:
+    "Block XI, B1 Extension, Federal Housing Estate, Ita Elega, Abeokuta, Ogun State",
+  parking: "Complimentary valet and on-site parking available for guests",
+  mapsUrl: "https://www.google.com/maps?q=7.191373,3.356954",
 };
 
 export const event: VenueDetail = {
@@ -251,6 +254,8 @@ export const accommodation: AccommodationInfo = {
 };
 
 export const zoomMeeting: ZoomMeetingInfo = {
+  link: "https://us05web.zoom.us/j/7796674079?pwd=LYPpInD47pRQTZTd9y44hhiLkEuSe8.1",
+  meetingId: "779 667 4079",
   note: "Can't make it in person? Livestream details will be shared here closer to the wedding day — check back soon.",
 };
 
@@ -282,6 +287,7 @@ export const asoEbiLadies: WeddingPartyMember[] = [
   { id: "al5", name: "Ayomide Andrew", role: "Asoebi Lady" },
   { id: "al6", name: "Ojetunde Jolaoluwa", role: "Asoebi Lady" },
   { id: "al7", name: "Praise Boldwill", role: "Asoebi Lady" },
+  { id: "al8", name: "Talitha Kuyet", role: "Asoebi Lady" },
 ];
 
 export const asoEbiMen: WeddingPartyMember[] = [
@@ -313,8 +319,7 @@ export const schedule: ScheduleItem[] = [
   {
     time: "10:30 AM",
     title: "Wedding Ceremony",
-    description:
-      "At the Kingdom Hall — address to be shared closer to the date",
+    description: "At the Kingdom Hall of Jehovah's Witness, Ita Elega, Abeokuta",
   },
   {
     time: "12:00 PM",
