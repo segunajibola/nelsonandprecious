@@ -42,7 +42,7 @@ export const loveStory: LoveStoryEvent[] = [
   {
     id: "first-date",
     title: "First Date",
-    date: "June 2024",
+    date: "August 2023",
     description:
       "Nelson invited Precious for coffee that turned into a four-hour conversation. They talked until the cafe closed and neither of them wanted the night to end.",
     image: "/images/couple-first-date.jpeg",
@@ -50,7 +50,7 @@ export const loveStory: LoveStoryEvent[] = [
   {
     id: "engagement",
     title: "Engagement",
-    date: "December 2025",
+    date: "November 2025",
     description:
       "On a quiet evening surrounded by fairy lights, Nelson asked Precious to be his forever. She said yes through happy tears, and their families celebrated late into the night.",
     image: "/images/couple-proposal.jpeg",
