@@ -1,7 +1,6 @@
 import { Resend } from "resend";
-import { ceremonyVenue, couple, event } from "@/lib/data";
-
-const SITE_URL = process.env.SITE_URL || "https://preciousandnelson.vercel.app";
+import { ceremonyVenue, couple, event, zoomMeeting } from "@/lib/data";
+import { SITE_URL } from "@/lib/site";
 
 function escapeHtml(value: string) {
   return value
@@ -36,11 +35,30 @@ export async function sendGuestConfirmationEmail(data: {
       const { error } = await resend.emails.send({
         from,
         to: data.to,
-        subject: `We'll miss you — ${couple.groomName} & ${couple.brideName}'s Wedding`,
+        subject: `See You on Zoom! — ${couple.groomName} & ${couple.brideName}'s Wedding`,
         html: `
           <div style="font-family: Georgia, serif; max-width: 480px; margin: 0 auto; color: #1c2841;">
             <p>Dear ${escapeHtml(data.name)},</p>
-            <p>Thank you for letting us know you won't be able to join us on ${couple.weddingDateDisplay}. You'll be in our hearts on the day.</p>
+            <p>Thank you for letting us know — we're so glad you'll still be with us in spirit on ${couple.weddingDateDisplay}! Here's how to join the celebration live on Zoom.</p>
+
+            ${
+              zoomMeeting.meetingId || zoomMeeting.passcode
+                ? `<div style="text-align: center; background: #1c2841; border-radius: 12px; padding: 20px; margin: 24px 0;">
+                    <p style="margin: 0 0 6px; color: #ffd9b3; font-size: 12px; letter-spacing: 2px; text-transform: uppercase;">Zoom Details</p>
+                    ${zoomMeeting.meetingId ? `<p style="margin: 0 0 4px; color: #ffffff; font-size: 14px;">Meeting ID: <strong>${escapeHtml(zoomMeeting.meetingId)}</strong></p>` : ""}
+                    ${zoomMeeting.passcode ? `<p style="margin: 0; color: #ffffff; font-size: 14px;">Passcode: <strong>${escapeHtml(zoomMeeting.passcode)}</strong></p>` : ""}
+                  </div>`
+                : ""
+            }
+
+            ${
+              zoomMeeting.link
+                ? `<p style="text-align: center; margin: 24px 0;">
+                    <a href="${zoomMeeting.link}" style="background: #1c2841; color: #ffffff; padding: 12px 28px; border-radius: 999px; text-decoration: none; font-size: 14px;">Join the Livestream</a>
+                  </p>`
+                : ""
+            }
+
             <p style="margin-top: 32px;">With love,<br />${couple.groomName} &amp; ${couple.brideName}</p>
           </div>
         `,

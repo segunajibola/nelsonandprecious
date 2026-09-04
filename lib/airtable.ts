@@ -124,15 +124,11 @@ export interface GuestRecord {
   guests: number | null;
   accessCode: string | null;
   qrToken: string | null;
+  checkedIn: boolean;
+  checkInTime: string | null;
 }
 
-// Richer lookup than findInviteByCode — used by the "resend my confirmation"
-// flow, which needs the email on file and whatever the guest already
-// answered (if anything) rather than just the invite's cap.
-export async function findGuestByInviteCode(code: string): Promise<GuestRecord | null> {
-  const record = await findRecordByFormula(`{Invite code} = "${escapeFormulaValue(code)}"`);
-  if (!record) return null;
-
+function mapGuestRecord(record: AirtableRecord): GuestRecord {
   const fields = record.fields;
   const attendingRaw = fields["Will you attend?"];
   const guestsRaw = fields["Number of guests"];
@@ -145,7 +141,28 @@ export async function findGuestByInviteCode(code: string): Promise<GuestRecord |
     guests: typeof guestsRaw === "number" ? guestsRaw : null,
     accessCode: typeof fields["Access code"] === "string" ? (fields["Access code"] as string) : null,
     qrToken: typeof fields["QR code"] === "string" ? (fields["QR code"] as string) : null,
+    checkedIn: fields["Checked In"] === true,
+    checkInTime: typeof fields["Check-In time"] === "string" ? (fields["Check-In time"] as string) : null,
   };
+}
+
+// Richer lookup than findInviteByCode — used by the "resend my confirmation"
+// flow, which needs the email on file and whatever the guest already
+// answered (if anything) rather than just the invite's cap.
+export async function findGuestByInviteCode(code: string): Promise<GuestRecord | null> {
+  const record = await findRecordByFormula(`{Invite code} = "${escapeFormulaValue(code)}"`);
+  return record ? mapGuestRecord(record) : null;
+}
+
+// Looks up a guest by the QR token embedded in their check-in QR code (see
+// /checkin/[token]). Public-facing by design — same trust model as the
+// invite link and the resend flow: the token is a long random secret only
+// the guest ever sees (via their confirmation email/QR image), so
+// possessing it is the authorization. This lets any door staff member's
+// ordinary phone camera scan-and-verify a guest without an admin login.
+export async function findGuestByQrToken(token: string): Promise<GuestRecord | null> {
+  const record = await findRecordByFormula(`{QR code} = "${escapeFormulaValue(token)}"`);
+  return record ? mapGuestRecord(record) : null;
 }
 
 const INVITE_CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";

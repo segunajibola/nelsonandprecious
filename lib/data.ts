@@ -408,6 +408,10 @@ export const faqs: FaqItem[] = [
     answer:
       "The wedding ceremony holds at the Kingdom Hall from 10:30 AM to 11:30 AM, and the reception begins at 12:00 PM at Purple Garden Event Center. Given expressway traffic, we recommend leaving with plenty of buffer time.",
   },
+  {
+    question: "Can I join the celebration virtually?",
+    answer: `Absolutely! We'll be streaming the ceremony live on Zoom — Meeting ID: ${zoomMeeting.meetingId}, Passcode: ${zoomMeeting.passcode}. You can also select "Joining via Zoom" when you RSVP and we'll send the link straight to your inbox.`,
+  },
 ];
 
 export const giftAccounts: BankAccountInfo[] = [

@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import confetti from "canvas-confetti";
-import { CalendarX, CircleCheck, KeyRound, LoaderCircle, Users } from "lucide-react";
+import { CalendarX, CircleCheck, KeyRound, LoaderCircle, Users, Video } from "lucide-react";
 import type { RsvpFormData, RsvpResult } from "@/types";
-import { couple } from "@/lib/data";
+import { couple, zoomMeeting } from "@/lib/data";
 import { Section } from "@/components/ui/Section";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Reveal } from "@/components/ui/Reveal";
@@ -132,8 +132,37 @@ export function RSVP({
                 <p className="max-w-md font-sans text-sm text-[color:var(--ink-muted)]">
                   {result?.attending === "yes"
                     ? "We can't wait to celebrate with you! A confirmation has been noted, and we've sent the details to your email."
-                    : "We're sorry you can't make it, but thank you for letting us know — you'll be in our hearts."}
+                    : "We're so glad you'll still be with us — here's how to join us live on Zoom! We've also sent these details to your email."}
                 </p>
+
+                {result?.attending === "no" && (
+                  <div className="mt-2 flex w-full max-w-sm flex-col items-center gap-3 rounded-2xl border border-[color:var(--border-soft)] bg-[color:var(--surface)] p-6">
+                    <span className="flex items-center gap-1.5 font-sans text-xs uppercase tracking-wide text-[color:var(--ink-muted)]">
+                      <Video size={13} /> Join via Zoom
+                    </span>
+                    {zoomMeeting.meetingId && (
+                      <p className="font-sans text-sm text-[color:var(--ink)]">
+                        Meeting ID: <span className="font-medium">{zoomMeeting.meetingId}</span>
+                      </p>
+                    )}
+                    {zoomMeeting.passcode && (
+                      <p className="font-sans text-sm text-[color:var(--ink)]">
+                        Passcode: <span className="font-medium">{zoomMeeting.passcode}</span>
+                      </p>
+                    )}
+                    {zoomMeeting.link && (
+                      <Button
+                        href={zoomMeeting.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        variant="secondary"
+                        className="mt-1"
+                      >
+                        Join the Livestream
+                      </Button>
+                    )}
+                  </div>
+                )}
 
                 {result?.attending === "yes" && result?.accessCode && (
                   <div className="mt-2 flex w-full max-w-sm flex-col items-center gap-4 rounded-2xl border border-[color:var(--border-soft)] bg-[color:var(--surface)] p-6">
@@ -223,7 +252,7 @@ export function RSVP({
                   <SelectInput id="attending" required value={form.attending} onChange={handleChange("attending")}>
                     <option value="" disabled>Select an option</option>
                     <option value="yes">Joyfully accepts</option>
-                    <option value="no">Regretfully declines</option>
+                    <option value="no">Joining via Zoom</option>
                   </SelectInput>
                 </FormField>
                 <FormField label={`Number of Guests (up to ${maxGuests})`} htmlFor="guests">

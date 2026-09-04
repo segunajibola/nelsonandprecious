@@ -1,10 +1,16 @@
 import QRCode from "qrcode";
+import { SITE_URL } from "@/lib/site";
 
 // Renders a QR code PNG for any token string — used both by the RSVP success
 // screen and embedded directly in the guest's confirmation email (as a plain
 // image URL, since most email clients strip inline data-URI images). This
 // endpoint doesn't touch Airtable at all; it's a pure "string in, PNG out"
 // utility, so it stays fast and has nothing to fail except the render itself.
+//
+// The QR encodes a full /checkin/[token] URL rather than the bare token, so
+// scanning it with an ordinary phone camera (not just the admin dashboard's
+// scanner) opens a page that verifies the RSVP — instead of the camera app
+// trying and failing to load the raw token text as a URL.
 export async function GET(_request: Request, ctx: RouteContext<"/api/qr/[token]">) {
   const { token } = await ctx.params;
   const value = decodeURIComponent(token);
@@ -13,8 +19,10 @@ export async function GET(_request: Request, ctx: RouteContext<"/api/qr/[token]"
     return new Response("Invalid token", { status: 400 });
   }
 
+  const checkInUrl = `${SITE_URL}/checkin/${encodeURIComponent(value)}`;
+
   try {
-    const buffer = await QRCode.toBuffer(value, {
+    const buffer = await QRCode.toBuffer(checkInUrl, {
       type: "png",
       width: 320,
       margin: 1,

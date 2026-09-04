@@ -19,6 +19,19 @@ type Feedback = { type: "success" | "error"; message: string };
 
 const RESCAN_COOLDOWN_MS = 3000;
 
+// The QR now encodes a full /checkin/[token] URL (see /api/qr/[token]), so
+// pull the token back out of it. Falls back to treating the scanned text as
+// a bare token for any already-generated QR images that predate that change.
+function extractToken(raw: string): string {
+  try {
+    const url = new URL(raw);
+    const segments = url.pathname.split("/").filter(Boolean);
+    return segments[segments.length - 1] || raw;
+  } catch {
+    return raw;
+  }
+}
+
 export default function CheckInPage() {
   const { password, authed, checkingAuth, authError, invites, loadingInvites, login, refetch } =
     useAdminAuth();
@@ -91,13 +104,14 @@ export default function CheckInPage() {
 
   const handleScan = useCallback(
     (decodedText: string) => {
+      const token = extractToken(decodedText);
       const now = Date.now();
-      if (lastScan.current && lastScan.current.token === decodedText && now - lastScan.current.at < RESCAN_COOLDOWN_MS) {
+      if (lastScan.current && lastScan.current.token === token && now - lastScan.current.at < RESCAN_COOLDOWN_MS) {
         return;
       }
-      lastScan.current = { token: decodedText, at: now };
+      lastScan.current = { token, at: now };
 
-      const match = attendingGuests.find((invite) => invite.qrToken === decodedText);
+      const match = attendingGuests.find((invite) => invite.qrToken === token);
       if (!match) {
         setFeedback({ type: "error", message: "That QR code doesn't match any confirmed guest." });
         return;
