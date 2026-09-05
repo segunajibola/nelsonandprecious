@@ -14,6 +14,7 @@ import {
 import { useAdminAuth, type InviteListItem } from "@/hooks/useAdminAuth";
 import { AdminGate } from "@/components/admin/AdminGate";
 import { QrScanner } from "@/components/admin/QrScanner";
+import { formatCheckInTimestamp } from "@/lib/utils";
 
 type Feedback = { type: "success" | "error"; message: string };
 
@@ -226,10 +227,7 @@ export default function CheckInPage() {
                 {invite.checkedIn ? (
                   <span className="flex items-center gap-1.5 rounded-full bg-[color:var(--gold)]/10 px-3 py-1.5 font-sans text-xs font-medium text-[color:var(--gold)]">
                     <UserCheck size={13} />
-                    {/* "Check-In time" in Airtable must be a Date field with "include a
-                        time field" enabled, or reads back date-only (no `T`) and the
-                        clock time below would be misleadingly wrong (midnight). */}
-                    Checked in{invite.checkInTime?.includes("T") ? ` at ${new Date(invite.checkInTime).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}` : ""}
+                    Checked in{formatCheckInTimestamp(invite.checkInTime) ? ` on ${formatCheckInTimestamp(invite.checkInTime)}` : ""}
                   </span>
                 ) : (
                   <button

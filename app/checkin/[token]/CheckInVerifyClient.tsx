@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { CircleCheck, KeyRound, LoaderCircle, UserCheck, Users } from "lucide-react";
+import { formatCheckInTimestamp } from "@/lib/utils";
 
 export function CheckInVerifyClient({
   token,
@@ -72,10 +73,7 @@ export function CheckInVerifyClient({
         {checkedIn ? (
           <div className="flex items-center gap-1.5 rounded-full bg-[color:var(--gold)]/10 px-4 py-2 font-sans text-sm font-medium text-[color:var(--gold)]">
             <UserCheck size={15} />
-            {/* "Check-In time" in Airtable must be a Date field with "include a
-                time field" enabled, or reads back date-only (no `T`) and the
-                clock time here would be misleadingly wrong (midnight). */}
-            Checked in{checkInTime?.includes("T") ? ` at ${new Date(checkInTime).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}` : ""}
+            Checked in{formatCheckInTimestamp(checkInTime) ? ` on ${formatCheckInTimestamp(checkInTime)}` : ""}
           </div>
         ) : (
           <button

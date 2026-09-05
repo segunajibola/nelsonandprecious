@@ -80,7 +80,8 @@ export async function sendGuestConfirmationEmail(data: {
 
           <div style="background: #fdf6f0; border-radius: 12px; padding: 20px; margin: 24px 0;">
             <p style="margin: 0 0 12px; font-weight: bold;">Ceremony — ${escapeHtml(ceremonyVenue.name)}</p>
-            <p style="margin: 0 0 16px; font-size: 14px;">${couple.weddingDateDisplay}, ${escapeHtml(ceremonyVenue.time)}</p>
+            <p style="margin: 0 0 4px; font-size: 14px;">${couple.weddingDateDisplay}, ${escapeHtml(ceremonyVenue.time)}</p>
+            <p style="margin: 0 0 16px; font-size: 14px;">${escapeHtml(ceremonyVenue.address)}</p>
             <p style="margin: 0 0 12px; font-weight: bold;">Reception — ${escapeHtml(event.name)}</p>
             <p style="margin: 0 0 4px; font-size: 14px;">${couple.weddingDateDisplay}, ${escapeHtml(event.time)}</p>
             <p style="margin: 0 0 16px; font-size: 14px;">${escapeHtml(event.address)}</p>
