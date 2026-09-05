@@ -11,6 +11,7 @@ interface SongRequest {
   createdTime: string;
   name: string;
   song: string;
+  artist: string;
 }
 
 export default function AdminSongsPage() {
@@ -60,7 +61,10 @@ export default function AdminSongsPage() {
                 key={r.recordId}
                 className="flex items-center justify-between gap-3 rounded-xl border border-[color:var(--border-soft)] bg-[color:var(--surface)] px-4 py-3"
               >
-                <span className="font-sans text-sm text-[color:var(--ink)]">{r.song}</span>
+                <span className="font-sans text-sm text-[color:var(--ink)]">
+                  {r.song}
+                  {r.artist && <span className="text-[color:var(--ink-muted)]"> — {r.artist}</span>}
+                </span>
                 <span className="font-sans text-xs text-[color:var(--ink-muted)]">— {r.name}</span>
               </div>
             ))}

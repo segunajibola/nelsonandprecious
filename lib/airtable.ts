@@ -417,14 +417,18 @@ export async function deleteGuestbookEntry(recordId: string): Promise<void> {
 }
 
 // --- Song requests -------------------------------------------------------
-// Required columns in the songs table: Name, Song. Internal-only (feeds the
-// MC/DJ) — no public listing, just create + an admin read-only view.
+// Required columns in the songs table: Name, Song, Artist. Internal-only
+// (feeds the MC/DJ) — no public listing, just create + an admin read-only
+// view. Only the song title is required from the guest — Artist is a
+// separate, optional field since guests often know a song without knowing
+// (or agreeing on) who performs it.
 
 export interface SongRequest {
   recordId: string;
   createdTime: string;
   name: string;
   song: string;
+  artist: string;
 }
 
 export async function listSongRequests(): Promise<SongRequest[]> {
@@ -435,12 +439,15 @@ export async function listSongRequests(): Promise<SongRequest[]> {
       createdTime: record.createdTime,
       name: typeof record.fields["Name"] === "string" ? (record.fields["Name"] as string) : "Anonymous",
       song: typeof record.fields["Song"] === "string" ? (record.fields["Song"] as string) : "",
+      artist: typeof record.fields["Artist"] === "string" ? (record.fields["Artist"] as string) : "",
     }))
     .sort((a, b) => b.createdTime.localeCompare(a.createdTime));
 }
 
-export async function createSongRequest(name: string, song: string): Promise<void> {
-  await createTableRecord(AIRTABLE_SONGS_TABLE!, { Name: name, Song: song });
+export async function createSongRequest(name: string, song: string, artist: string): Promise<void> {
+  const fields: Record<string, unknown> = { Name: name, Song: song };
+  if (artist) fields["Artist"] = artist;
+  await createTableRecord(AIRTABLE_SONGS_TABLE!, fields);
 }
 
 // --- Shared photos ---------------------------------------------------------

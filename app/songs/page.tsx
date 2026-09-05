@@ -17,6 +17,7 @@ export default function SongRequestsPage() {
   const { isPlaying, toggle } = useBackgroundMusic("/music/chike-apple.mp3");
   const [name, setName] = useState("");
   const [song, setSong] = useState("");
+  const [artist, setArtist] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
@@ -29,12 +30,13 @@ export default function SongRequestsPage() {
       const res = await fetch("/api/songs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, song }),
+        body: JSON.stringify({ name, song, artist }),
       });
       const body = await res.json().catch(() => null);
       if (!res.ok) throw new Error(body?.error || "Something went wrong.");
       setSent(true);
       setSong("");
+      setArtist("");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
@@ -74,13 +76,21 @@ export default function SongRequestsPage() {
                 <FormField label="Your Name" htmlFor="song-name">
                   <TextInput id="song-name" value={name} onChange={(e) => setName(e.target.value)} />
                 </FormField>
-                <FormField label="Song Title & Artist" htmlFor="song-title" required>
+                <FormField label="Song Title" htmlFor="song-title" required>
                   <TextInput
                     id="song-title"
                     value={song}
                     onChange={(e) => setSong(e.target.value)}
-                    placeholder={`e.g. "Perfect" by Ed Sheeran`}
+                    placeholder={`e.g. "Perfect"`}
                     required
+                  />
+                </FormField>
+                <FormField label="Artist (optional)" htmlFor="song-artist">
+                  <TextInput
+                    id="song-artist"
+                    value={artist}
+                    onChange={(e) => setArtist(e.target.value)}
+                    placeholder="e.g. Ed Sheeran"
                   />
                 </FormField>
                 {error && <p className="font-sans text-sm text-red-500">{error}</p>}

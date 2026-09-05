@@ -10,13 +10,14 @@ export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
   const name = typeof body?.name === "string" ? body.name.trim().slice(0, 100) : "Anonymous";
   const song = typeof body?.song === "string" ? body.song.trim().slice(0, 200) : "";
+  const artist = typeof body?.artist === "string" ? body.artist.trim().slice(0, 200) : "";
 
   if (!song) {
     return Response.json({ error: "Please enter a song title." }, { status: 400 });
   }
 
   try {
-    await createSongRequest(name || "Anonymous", song);
+    await createSongRequest(name || "Anonymous", song, artist);
     return Response.json({ ok: true });
   } catch (error) {
     console.error("Failed to create song request:", error);
