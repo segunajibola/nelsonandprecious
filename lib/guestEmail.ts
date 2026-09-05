@@ -1,14 +1,7 @@
 import { Resend } from "resend";
 import { ceremonyVenue, couple, event, zoomMeeting } from "@/lib/data";
 import { SITE_URL } from "@/lib/site";
-
-function escapeHtml(value: string) {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
+import { escapeHtml } from "@/lib/utils";
 
 // Sends the guest their own confirmation — the whole reason email is
 // required on the RSVP form. Reused by both the initial RSVP submission and

@@ -20,9 +20,12 @@ export const couple = {
   brideFullName: "Opeyemi Precious Bamidele",
   groomFullName: "Nelson Ugochukwu Nwabekee",
   hashtag: "#PNLockedIn",
-  weddingDateISO: "2026-09-26T12:00:00",
+  // "+01:00" pins these to West Africa Time (the wedding's actual timezone)
+  // so countdowns, deadline checks, and calendar links resolve to the same
+  // real-world instant no matter what timezone the viewer's device is in.
+  weddingDateISO: "2026-09-26T12:00:00+01:00",
   weddingDateDisplay: "September 26, 2026",
-  rsvpDeadlineISO: "2026-09-21T23:59:59",
+  rsvpDeadlineISO: "2026-09-21T23:59:59+01:00",
   rsvpDeadlineDisplay: "September 21, 2026",
   tagline: "Two Hearts, One Beginning",
   heroImage: "/images/couple-formal-3.jpeg",
@@ -36,6 +39,9 @@ export const navLinks = [
   { label: "Our Story", href: "/gallery#our-story" },
   { label: "Wedding Party", href: "/gallery#wedding-party" },
   { label: "FAQ", href: "/details#faq" },
+  { label: "Guestbook", href: "/guestbook" },
+  { label: "Song Requests", href: "/songs" },
+  { label: "Share Photos", href: "/share-photos" },
 ];
 
 export const loveStory: LoveStoryEvent[] = [
@@ -202,6 +208,8 @@ export const ceremonyVenue: VenueDetail = {
     "Block XI, B1 Extension, Federal Housing Estate, Ita Elega, Abeokuta, Ogun State",
   parking: "Complimentary valet and on-site parking available for guests",
   mapsUrl: "https://www.google.com/maps?q=7.191373,3.356954",
+  startISO: "2026-09-26T10:30:00+01:00",
+  endISO: "2026-09-26T11:30:00+01:00",
 };
 
 export const event: VenueDetail = {
@@ -218,6 +226,8 @@ export const event: VenueDetail = {
     encodeURIComponent(
       "Purple Garden Event Center, beside MFM Southwest 1 Headquarters, Obantoko, Abeokuta, Ogun State, Nigeria",
     ),
+  startISO: "2026-09-26T12:00:00+01:00",
+  endISO: "2026-09-26T18:00:00+01:00",
 };
 
 export const accommodation: AccommodationInfo = {

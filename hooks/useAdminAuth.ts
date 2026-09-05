@@ -8,6 +8,7 @@ export interface InviteListItem {
   label: string;
   maxGuests: number;
   inviteCode: string;
+  email: string | null;
   attending: "yes" | "no" | null;
   guestsConfirmed: number | null;
   accessCode: string | null;

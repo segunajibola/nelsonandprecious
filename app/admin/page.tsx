@@ -7,6 +7,11 @@ import {
   CircleX,
   Clock,
   Copy,
+  Download,
+  Mail,
+  MessageCircleHeart,
+  Music,
+  Printer,
   PlusCircle,
   QrCode,
   UserCheck,
@@ -14,6 +19,7 @@ import {
 } from "lucide-react";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { AdminGate } from "@/components/admin/AdminGate";
+import { downloadCsv, toCsv } from "@/lib/csv";
 
 function inviteUrl(code: string) {
   if (typeof window === "undefined") return `/rsvp/${code}`;
@@ -34,11 +40,14 @@ export default function AdminPage() {
     useAdminAuth();
 
   const [label, setLabel] = useState("");
+  const [email, setEmail] = useState("");
   const [maxGuests, setMaxGuests] = useState("1");
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState("");
   const [justCreated, setJustCreated] = useState<{ inviteCode: string } | null>(null);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
+  const [reminding, setReminding] = useState(false);
+  const [remindResult, setRemindResult] = useState<string | null>(null);
 
   const stats = useMemo(() => {
     const responded = invites.filter((i) => i.attending !== null);
@@ -63,13 +72,14 @@ export default function AdminPage() {
       const res = await fetch("/api/admin/invites", {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-admin-password": password },
-        body: JSON.stringify({ label, maxGuests: Number(maxGuests) }),
+        body: JSON.stringify({ label, email, maxGuests: Number(maxGuests) }),
       });
       const body = await res.json();
       if (!res.ok) throw new Error(body?.error || "Something went wrong.");
 
       setJustCreated({ inviteCode: body.invite.inviteCode });
       setLabel("");
+      setEmail("");
       setMaxGuests("1");
       await refetch();
     } catch (err) {
@@ -86,17 +96,81 @@ export default function AdminPage() {
     });
   }
 
+  function exportCsv() {
+    const rows = [
+      ["Name", "Invite Code", "Email", "Max Guests", "Attending", "Guests Confirmed", "Access Code", "Checked In", "Check-In Time"],
+      ...invites.map((invite) => [
+        invite.label,
+        invite.inviteCode,
+        invite.email ?? "",
+        invite.maxGuests,
+        invite.attending === "yes" ? "Yes" : invite.attending === "no" ? "No" : "No response",
+        invite.guestsConfirmed ?? "",
+        invite.accessCode ?? "",
+        invite.checkedIn ? "Yes" : "No",
+        invite.checkInTime ?? "",
+      ]),
+    ];
+    downloadCsv(`guest-list-${new Date().toISOString().slice(0, 10)}.csv`, toCsv(rows));
+  }
+
+  async function sendReminders() {
+    setReminding(true);
+    setRemindResult(null);
+    try {
+      const res = await fetch("/api/admin/remind", {
+        method: "POST",
+        headers: { "x-admin-password": password },
+      });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body?.error || "Something went wrong.");
+
+      const parts = [`Sent ${body.sent} reminder${body.sent === 1 ? "" : "s"}.`];
+      if (body.skippedNoEmail > 0) {
+        parts.push(`${body.skippedNoEmail} guest${body.skippedNoEmail === 1 ? "" : "s"} skipped (no email on file).`);
+      }
+      if (body.failed?.length) {
+        parts.push(`Failed for: ${body.failed.join(", ")}.`);
+      }
+      setRemindResult(parts.join(" "));
+    } catch (err) {
+      setRemindResult(err instanceof Error ? err.message : "Something went wrong.");
+    } finally {
+      setReminding(false);
+    }
+  }
+
   return (
     <AdminGate checkingAuth={checkingAuth} authed={authed} authError={authError} onLogin={login}>
       <main className="mx-auto min-h-svh w-full max-w-3xl px-6 py-16">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h1 className="font-serif text-3xl text-[color:var(--ink)]">Guest Invites</h1>
-          <Link
-            href="/admin/checkin"
-            className="flex items-center gap-1.5 rounded-full border border-[color:var(--border-soft)] px-4 py-2 font-sans text-sm text-[color:var(--ink)] transition-colors hover:border-[color:var(--gold)] hover:text-[color:var(--gold)]"
-          >
-            <QrCode size={15} /> Day-of Check-In
-          </Link>
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href="/admin/checkin"
+              className="flex items-center gap-1.5 rounded-full border border-[color:var(--border-soft)] px-4 py-2 font-sans text-sm text-[color:var(--ink)] transition-colors hover:border-[color:var(--gold)] hover:text-[color:var(--gold)]"
+            >
+              <QrCode size={15} /> Day-of Check-In
+            </Link>
+            <Link
+              href="/admin/checkin/print"
+              className="flex items-center gap-1.5 rounded-full border border-[color:var(--border-soft)] px-4 py-2 font-sans text-sm text-[color:var(--ink)] transition-colors hover:border-[color:var(--gold)] hover:text-[color:var(--gold)]"
+            >
+              <Printer size={15} /> Printable Sheet
+            </Link>
+            <Link
+              href="/admin/guestbook"
+              className="flex items-center gap-1.5 rounded-full border border-[color:var(--border-soft)] px-4 py-2 font-sans text-sm text-[color:var(--ink)] transition-colors hover:border-[color:var(--gold)] hover:text-[color:var(--gold)]"
+            >
+              <MessageCircleHeart size={15} /> Guestbook
+            </Link>
+            <Link
+              href="/admin/songs"
+              className="flex items-center gap-1.5 rounded-full border border-[color:var(--border-soft)] px-4 py-2 font-sans text-sm text-[color:var(--ink)] transition-colors hover:border-[color:var(--gold)] hover:text-[color:var(--gold)]"
+            >
+              <Music size={15} /> Song Requests
+            </Link>
+          </div>
         </div>
         <p className="mt-1 font-sans text-sm text-[color:var(--ink-muted)]">
           Generate a personal RSVP link for a family, capped at however many guests they&apos;re
@@ -115,11 +189,35 @@ export default function AdminPage() {
           </div>
         )}
 
+        {invites.length > 0 && (
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={exportCsv}
+              className="flex items-center gap-1.5 rounded-full border border-[color:var(--border-soft)] px-4 py-2 font-sans text-xs text-[color:var(--ink)] transition-colors hover:border-[color:var(--gold)] hover:text-[color:var(--gold)]"
+            >
+              <Download size={13} /> Export CSV
+            </button>
+            <button
+              type="button"
+              onClick={sendReminders}
+              disabled={reminding}
+              className="flex items-center gap-1.5 rounded-full border border-[color:var(--border-soft)] px-4 py-2 font-sans text-xs text-[color:var(--ink)] transition-colors hover:border-[color:var(--gold)] hover:text-[color:var(--gold)] disabled:opacity-60"
+            >
+              {reminding ? <UserCheck size={13} className="animate-spin" /> : <Mail size={13} />}
+              Remind Guests Who Haven&apos;t RSVP&apos;d
+            </button>
+          </div>
+        )}
+        {remindResult && (
+          <p className="mt-2 font-sans text-xs text-[color:var(--ink-muted)]">{remindResult}</p>
+        )}
+
         <form
           onSubmit={handleCreate}
-          className="mt-8 flex flex-col gap-4 rounded-2xl border border-[color:var(--border-soft)] bg-[color:var(--surface)] p-6 sm:flex-row sm:items-end"
+          className="mt-8 flex flex-col gap-4 rounded-2xl border border-[color:var(--border-soft)] bg-[color:var(--surface)] p-6 sm:flex-row sm:items-end sm:flex-wrap"
         >
-          <div className="flex flex-1 flex-col gap-1.5">
+          <div className="flex flex-1 flex-col gap-1.5 sm:min-w-[180px]">
             <label className="font-sans text-xs uppercase tracking-wide text-[color:var(--ink-muted)]">
               Name shown on their invite <span className="text-[color:var(--gold)]">*</span>
             </label>
@@ -128,6 +226,18 @@ export default function AdminPage() {
               onChange={(e) => setLabel(e.target.value)}
               placeholder="e.g. The Okafor Family"
               required
+              className="w-full rounded-xl border border-[color:var(--border-soft)] bg-[color:var(--surface)] px-4 py-2.5 font-sans text-sm text-[color:var(--ink)] outline-none focus:border-[color:var(--gold)]"
+            />
+          </div>
+          <div className="flex flex-1 flex-col gap-1.5 sm:min-w-[180px]">
+            <label className="font-sans text-xs uppercase tracking-wide text-[color:var(--ink-muted)]">
+              Email (optional, for reminders)
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="e.g. family@example.com"
               className="w-full rounded-xl border border-[color:var(--border-soft)] bg-[color:var(--surface)] px-4 py-2.5 font-sans text-sm text-[color:var(--ink)] outline-none focus:border-[color:var(--gold)]"
             />
           </div>
@@ -196,6 +306,7 @@ export default function AdminPage() {
                   </span>
                   <span className="font-sans text-xs text-[color:var(--ink-muted)]">
                     Code: {invite.inviteCode}
+                    {invite.email ? ` · ${invite.email}` : ""}
                   </span>
                 </div>
 

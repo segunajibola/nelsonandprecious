@@ -34,6 +34,9 @@ export interface VenueDetail {
   dressCode?: string;
   parking?: string;
   mapsUrl?: string;
+  /** Wall-clock start, with a fixed UTC offset (e.g. "+01:00" for WAT) so calendar links resolve to the correct instant regardless of the viewer's timezone. */
+  startISO?: string;
+  endISO?: string;
 }
 
 export interface AccommodationInfo {

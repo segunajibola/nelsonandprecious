@@ -8,6 +8,7 @@ import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Reveal } from "@/components/ui/Reveal";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
+import { AddToCalendar } from "@/components/ui/AddToCalendar";
 
 function DetailRow({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: string }) {
   return (
@@ -21,7 +22,15 @@ function DetailRow({ icon: Icon, label, value }: { icon: React.ElementType; labe
   );
 }
 
-function VenueCard({ venue, icon: Icon }: { venue: VenueDetail; icon: React.ElementType }) {
+function VenueCard({
+  venue,
+  icon: Icon,
+  eventSlug,
+}: {
+  venue: VenueDetail;
+  icon: React.ElementType;
+  eventSlug: "ceremony" | "reception";
+}) {
   return (
     <Card className="flex h-full w-full flex-col gap-5">
       <Icon size={28} className="text-[color:var(--gold)]" />
@@ -33,11 +42,14 @@ function VenueCard({ venue, icon: Icon }: { venue: VenueDetail; icon: React.Elem
         {venue.dressCode && <DetailRow icon={Shirt} label="Dress Code" value={venue.dressCode} />}
         {venue.parking && <DetailRow icon={MapPin} label="Parking" value={venue.parking} />}
       </div>
-      {venue.mapsUrl && (
-        <Button href={venue.mapsUrl} target="_blank" rel="noopener noreferrer" variant="secondary" className="mt-auto w-full">
-          Open in Google Maps
-        </Button>
-      )}
+      <div className="mt-auto flex flex-col gap-3">
+        {venue.mapsUrl && (
+          <Button href={venue.mapsUrl} target="_blank" rel="noopener noreferrer" variant="secondary" className="w-full">
+            Open in Google Maps
+          </Button>
+        )}
+        <AddToCalendar venue={venue} eventSlug={eventSlug} />
+      </div>
     </Card>
   );
 }
@@ -54,10 +66,10 @@ export function WeddingDetails() {
 
       <div className="mx-auto grid max-w-4xl gap-8 sm:grid-cols-2">
         <Reveal>
-          <VenueCard venue={ceremonyVenue} icon={House} />
+          <VenueCard venue={ceremonyVenue} icon={House} eventSlug="ceremony" />
         </Reveal>
         <Reveal delay={0.1}>
-          <VenueCard venue={event} icon={PartyPopper} />
+          <VenueCard venue={event} icon={PartyPopper} eventSlug="reception" />
         </Reveal>
       </div>
     </Section>

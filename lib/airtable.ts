@@ -4,9 +4,24 @@
 const AIRTABLE_TOKEN = process.env.AIRTABLE_TOKEN;
 const AIRTABLE_BASE_ID = process.env.AIRTABLE_BASE_ID;
 const AIRTABLE_TABLE_NAME = process.env.AIRTABLE_TABLE_NAME;
+const AIRTABLE_GUESTBOOK_TABLE = process.env.AIRTABLE_GUESTBOOK_TABLE;
+const AIRTABLE_SONGS_TABLE = process.env.AIRTABLE_SONGS_TABLE;
+const AIRTABLE_PHOTOS_TABLE = process.env.AIRTABLE_PHOTOS_TABLE;
 
 export function airtableConfigured() {
   return Boolean(AIRTABLE_TOKEN && AIRTABLE_BASE_ID && AIRTABLE_TABLE_NAME);
+}
+
+export function guestbookConfigured() {
+  return Boolean(AIRTABLE_TOKEN && AIRTABLE_BASE_ID && AIRTABLE_GUESTBOOK_TABLE);
+}
+
+export function songsConfigured() {
+  return Boolean(AIRTABLE_TOKEN && AIRTABLE_BASE_ID && AIRTABLE_SONGS_TABLE);
+}
+
+export function photosConfigured() {
+  return Boolean(AIRTABLE_TOKEN && AIRTABLE_BASE_ID && AIRTABLE_PHOTOS_TABLE);
 }
 
 function airtableUrl(query?: string) {
@@ -197,13 +212,22 @@ export interface CreatedInvite {
 // Creates a new pre-seeded invite row. `label` becomes the guest's fixed,
 // non-editable display name on the RSVP form and in their confirmation email
 // — it's guest-facing, so the caller (the admin API) requires it to be set.
-export async function createInvite(maxGuests: number, label: string): Promise<CreatedInvite> {
+// `email`, if given, pre-fills the same Email column the RSVP form later
+// writes to — it's what lets the "remind guests who haven't RSVP'd" feature
+// reach someone before they've ever submitted the form themselves.
+export async function createInvite(
+  maxGuests: number,
+  label: string,
+  email?: string,
+): Promise<CreatedInvite> {
   const inviteCode = await generateUniqueInviteCode();
-  const record = await createRecord({
+  const fields: Record<string, unknown> = {
     Name: label,
     "Max guests": maxGuests,
     "Invite code": inviteCode,
-  });
+  };
+  if (email) fields["Email"] = email;
+  const record = await createRecord(fields);
   return { recordId: record.id, inviteCode, maxGuests, label };
 }
 
@@ -213,6 +237,7 @@ export interface InviteListItem {
   label: string;
   maxGuests: number;
   inviteCode: string;
+  email: string | null;
   attending: "yes" | "no" | null;
   guestsConfirmed: number | null;
   accessCode: string | null;
@@ -240,6 +265,7 @@ export async function listInvites(): Promise<InviteListItem[]> {
         label: typeof fields["Name"] === "string" ? (fields["Name"] as string) : "",
         maxGuests: typeof fields["Max guests"] === "number" ? (fields["Max guests"] as number) : 0,
         inviteCode: typeof fields["Invite code"] === "string" ? (fields["Invite code"] as string) : "",
+        email: typeof fields["Email"] === "string" ? (fields["Email"] as string) : null,
         attending,
         guestsConfirmed: typeof guestsRaw === "number" ? guestsRaw : null,
         accessCode: typeof fields["Access code"] === "string" ? (fields["Access code"] as string) : null,
@@ -279,4 +305,171 @@ export async function checkInGuest(recordId: string): Promise<CheckInResult> {
   const checkInTime = new Date().toISOString();
   await updateRecord(recordId, { "Checked In": true, "Check-In time": checkInTime });
   return { recordId, name, guests, alreadyCheckedIn: false, checkInTime };
+}
+
+// --- Generic multi-table helpers -------------------------------------------
+// The functions above are all implicitly bound to AIRTABLE_TABLE_NAME (the
+// invites table). Guestbook/songs/photos live in their own tables in the
+// same base, so these take an explicit table name instead of hardcoding one.
+
+function tableUrl(table: string, query?: string) {
+  const base = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(table)}`;
+  return query ? `${base}?${query}` : base;
+}
+
+async function listTableRecords(table: string, formula?: string): Promise<AirtableRecord[]> {
+  const records: AirtableRecord[] = [];
+  let offset: string | undefined;
+
+  do {
+    const query: string[] = [];
+    if (formula) query.push(`filterByFormula=${encodeURIComponent(formula)}`);
+    if (offset) query.push(`offset=${encodeURIComponent(offset)}`);
+    const res = await fetch(tableUrl(table, query.join("&")), { headers: authHeaders() });
+    if (!res.ok) throw new Error(`Airtable list failed with status ${res.status}`);
+    const body = (await res.json()) as { records: AirtableRecord[]; offset?: string };
+    records.push(...body.records);
+    offset = body.offset;
+  } while (offset);
+
+  return records;
+}
+
+async function createTableRecord(table: string, fields: Record<string, unknown>): Promise<AirtableRecord> {
+  const res = await fetch(tableUrl(table), {
+    method: "POST",
+    headers: authHeaders(true),
+    body: JSON.stringify({ records: [{ fields }], typecast: true }),
+  });
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`Airtable create failed with status ${res.status}: ${body}`);
+  }
+  const data = (await res.json()) as { records: AirtableRecord[] };
+  return data.records[0];
+}
+
+async function updateTableRecord(
+  table: string,
+  recordId: string,
+  fields: Record<string, unknown>,
+): Promise<void> {
+  const res = await fetch(tableUrl(table), {
+    method: "PATCH",
+    headers: authHeaders(true),
+    body: JSON.stringify({ records: [{ id: recordId, fields }], typecast: true }),
+  });
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`Airtable update failed with status ${res.status}: ${body}`);
+  }
+}
+
+async function deleteTableRecord(table: string, recordId: string): Promise<void> {
+  const res = await fetch(`${tableUrl(table)}/${recordId}`, {
+    method: "DELETE",
+    headers: authHeaders(),
+  });
+  if (!res.ok) throw new Error(`Airtable delete failed with status ${res.status}`);
+}
+
+// --- Guestbook ---------------------------------------------------------
+// Required columns in the guestbook table: Name, Message, Approved (checkbox).
+// Public submissions default to Approved=false so the couple can moderate
+// before a message shows up on the public /guestbook page.
+
+export interface GuestbookEntry {
+  recordId: string;
+  createdTime: string;
+  name: string;
+  message: string;
+  approved: boolean;
+}
+
+function mapGuestbookEntry(record: AirtableRecord): GuestbookEntry {
+  return {
+    recordId: record.id,
+    createdTime: record.createdTime,
+    name: typeof record.fields["Name"] === "string" ? (record.fields["Name"] as string) : "Anonymous",
+    message: typeof record.fields["Message"] === "string" ? (record.fields["Message"] as string) : "",
+    approved: record.fields["Approved"] === true,
+  };
+}
+
+export async function listGuestbookEntries(onlyApproved: boolean): Promise<GuestbookEntry[]> {
+  const records = await listTableRecords(
+    AIRTABLE_GUESTBOOK_TABLE!,
+    onlyApproved ? "{Approved} = TRUE()" : undefined,
+  );
+  return records.map(mapGuestbookEntry).sort((a, b) => b.createdTime.localeCompare(a.createdTime));
+}
+
+export async function createGuestbookEntry(name: string, message: string): Promise<void> {
+  await createTableRecord(AIRTABLE_GUESTBOOK_TABLE!, { Name: name, Message: message, Approved: false });
+}
+
+export async function approveGuestbookEntry(recordId: string): Promise<void> {
+  await updateTableRecord(AIRTABLE_GUESTBOOK_TABLE!, recordId, { Approved: true });
+}
+
+export async function deleteGuestbookEntry(recordId: string): Promise<void> {
+  await deleteTableRecord(AIRTABLE_GUESTBOOK_TABLE!, recordId);
+}
+
+// --- Song requests -------------------------------------------------------
+// Required columns in the songs table: Name, Song. Internal-only (feeds the
+// MC/DJ) — no public listing, just create + an admin read-only view.
+
+export interface SongRequest {
+  recordId: string;
+  createdTime: string;
+  name: string;
+  song: string;
+}
+
+export async function listSongRequests(): Promise<SongRequest[]> {
+  const records = await listTableRecords(AIRTABLE_SONGS_TABLE!);
+  return records
+    .map((record): SongRequest => ({
+      recordId: record.id,
+      createdTime: record.createdTime,
+      name: typeof record.fields["Name"] === "string" ? (record.fields["Name"] as string) : "Anonymous",
+      song: typeof record.fields["Song"] === "string" ? (record.fields["Song"] as string) : "",
+    }))
+    .sort((a, b) => b.createdTime.localeCompare(a.createdTime));
+}
+
+export async function createSongRequest(name: string, song: string): Promise<void> {
+  await createTableRecord(AIRTABLE_SONGS_TABLE!, { Name: name, Song: song });
+}
+
+// --- Shared photos ---------------------------------------------------------
+// Required columns in the photos table: Name, Message, Photo (attachment).
+// Uses Airtable's separate content-upload endpoint, which takes the file
+// inline as base64 rather than a public URL — the record is created first,
+// then the attachment is uploaded onto it.
+
+export async function uploadPhoto(
+  name: string,
+  message: string,
+  file: { contentType: string; filename: string; base64: string },
+): Promise<void> {
+  const record = await createTableRecord(AIRTABLE_PHOTOS_TABLE!, { Name: name, Message: message });
+
+  const res = await fetch(
+    `https://content.airtable.com/v0/${AIRTABLE_BASE_ID}/${record.id}/Photo/uploadAttachment`,
+    {
+      method: "POST",
+      headers: authHeaders(true),
+      body: JSON.stringify({
+        contentType: file.contentType,
+        filename: file.filename,
+        file: file.base64,
+      }),
+    },
+  );
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`Airtable attachment upload failed with status ${res.status}: ${body}`);
+  }
 }
