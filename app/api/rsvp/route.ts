@@ -114,10 +114,13 @@ async function sendFallbackEmail(data: {
   submittedAt: string;
 }) {
   const apiKey = process.env.RESEND_API_KEY;
-  const to = process.env.RSVP_NOTIFICATION_EMAIL;
+  // Comma-separated so the couple can both be notified, e.g. "a@x.com, b@x.com".
+  const to = process.env.RSVP_NOTIFICATION_EMAIL?.split(",")
+    .map((address) => address.trim())
+    .filter(Boolean);
   const from = process.env.RESEND_FROM_EMAIL;
 
-  if (!apiKey || !to || !from) return false;
+  if (!apiKey || !to?.length || !from) return false;
 
   try {
     const resend = new Resend(apiKey);
